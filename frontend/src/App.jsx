@@ -20,7 +20,12 @@ import {
   ArrowDownCircle,
   Eye,
   CheckCircle2,
-  Building2
+  Building2,
+  Crown,
+  ExternalLink,
+  TrendingUp,
+  Key,
+  CreditCard
 } from 'lucide-react';
 import DrmProtectedCanvas from './components/DrmProtectedCanvas';
 import BrandSelector from './components/BrandSelector';
@@ -30,6 +35,9 @@ import FitControlsPanel from './components/FitControlsPanel';
 import VariationsGallery from './components/VariationsGallery';
 import PipelineStatus from './components/PipelineStatus';
 import HamburgerMenu from './components/HamburgerMenu';
+import MonetizationModal from './components/MonetizationModal';
+import AiEngineModal from './components/AiEngineModal';
+import AuthModal from './components/AuthModal';
 
 export default function App() {
   const [brands, setBrands] = useState([]);
@@ -60,9 +68,24 @@ export default function App() {
   const [zoomActive, setZoomActive] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
 
-  // 1. Fetch Brands Catalog on Mount
+  // Enterprise Modals State
+  const [isMonetizationOpen, setIsMonetizationOpen] = useState(false);
+  const [isAiEngineOpen, setIsAiEngineOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+
+  // User Account & Monetization Quota State
+  const [userPlan, setUserPlan] = useState('free');
+  const [userRole, setUserRole] = useState('user');
+  const [quota, setQuota] = useState({
+    used_today: 1,
+    limit: 3,
+    remaining: 2
+  });
+  const [tryonHistory, setTryonHistory] = useState([]);
+
+  // 1. Fetch Brands Catalog & Quota on Mount
   useEffect(() => {
-    async function loadBrands() {
+    async function loadInitialData() {
       try {
         const res = await fetch('/api/brands');
         if (res.ok) {
@@ -79,8 +102,33 @@ export default function App() {
       } catch (err) {
         console.warn("Using offline brand fallback catalog:", err);
       }
+
+      try {
+        const quotaRes = await fetch('/api/billing/plan');
+        if (quotaRes.ok) {
+          const qData = await quotaRes.json();
+          setUserPlan(qData.current_plan);
+          setQuota({
+            used_today: qData.free_tier.used_today,
+            limit: qData.free_tier.daily_quota,
+            remaining: qData.free_tier.remaining
+          });
+        }
+      } catch (err) {
+        console.warn("Using offline billing state:", err);
+      }
+
+      try {
+        const histRes = await fetch('/api/user/history');
+        if (histRes.ok) {
+          const hData = await histRes.json();
+          setTryonHistory(hData.history || []);
+        }
+      } catch (err) {
+        console.warn("Using offline history state:", err);
+      }
     }
-    loadBrands();
+    loadInitialData();
   }, []);
 
   // 2. Virtual Try-On Execution Routine
@@ -118,9 +166,32 @@ export default function App() {
       }
 
       const data = await res.json();
+
+      if (data.status === 'quota_exceeded') {
+        setIsMonetizationOpen(true);
+        setErrorMessage("Daily free limit reached (3/3 Try-Ons). Upgrade to Pro (₹299/mo) for unlimited instant GPU synthesis!");
+        return;
+      }
+
+      if (data.user_quota) {
+        setQuota(data.user_quota);
+        setUserPlan(data.user_quota.plan);
+      }
+
       setTryonResult(data);
       setActiveImage(data.primary_image);
       setActiveVariationId('primary');
+
+      // Refresh history
+      try {
+        const hRes = await fetch('/api/user/history');
+        if (hRes.ok) {
+          const hData = await hRes.json();
+          setTryonHistory(hData.history || []);
+        }
+      } catch (e) {
+        // ignore
+      }
     } catch (err) {
       console.error("Try-on error:", err);
       setErrorMessage("Virtual Try-On generation encountered an issue. Re-verifying pipeline...");
@@ -255,15 +326,55 @@ export default function App() {
             </div>
           </div>
 
-          {/* Right Status Badges & Professional Hamburger Menu */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <span className="wl-badge wl-badge-gold">
-              <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#10b981', display: 'inline-block' }} />
-              29 BRANDS
-            </span>
-            <span className="wl-badge wl-badge-drm">
-              <Lock style={{ width: 13, height: 13 }} /> DRM PROTECTED
-            </span>
+          {/* Right Action CTAs: Monetization, AI Engine, Auth & Hamburger */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            {/* 1. Upgrade to Pro Button / Quota Pill */}
+            <button
+              onClick={() => setIsMonetizationOpen(true)}
+              style={{
+                background: userPlan === 'pro'
+                  ? 'linear-gradient(135deg, rgba(223, 178, 107, 0.25) 0%, rgba(223, 178, 107, 0.1) 100%)'
+                  : 'linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-gold-dark) 100%)',
+                color: userPlan === 'pro' ? 'var(--accent-gold-light)' : '#07090e',
+                border: '1px solid',
+                borderColor: userPlan === 'pro' ? 'var(--accent-gold)' : 'transparent',
+                borderRadius: 'var(--radius-full)',
+                padding: '6px 14px',
+                fontSize: '11px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                boxShadow: userPlan === 'pro' ? '0 0 14px rgba(223, 178, 107, 0.3)' : '0 2px 14px var(--accent-gold-glow)',
+                transition: 'var(--transition-smooth)'
+              }}
+            >
+              <Crown style={{ width: 13, height: 13 }} />
+              {userPlan === 'pro' ? "PRO ATELIER (UNLIMITED)" : `UPGRADE ₹299 (${quota.remaining}/3 LEFT)`}
+            </button>
+
+            {/* 2. AI Engine Architecture Button */}
+            <button
+              onClick={() => setIsAiEngineOpen(true)}
+              className="wl-tool-btn"
+              style={{ fontSize: '11px', padding: '6px 12px', background: 'rgba(0, 242, 254, 0.08)', borderColor: 'rgba(0, 242, 254, 0.3)', color: 'var(--accent-cyan)' }}
+              title="View 6-stage neural pipeline & GPU cluster architecture"
+            >
+              <Cpu style={{ width: 13, height: 13 }} />
+              AI Engine
+            </button>
+
+            {/* 3. Account / Role Switcher Pill */}
+            <button
+              onClick={() => setIsAuthOpen(true)}
+              className="wl-tool-btn"
+              style={{ fontSize: '11px', padding: '6px 12px' }}
+              title="Account & Role settings"
+            >
+              <User style={{ width: 13, height: 13, color: 'var(--accent-gold)' }} />
+              <span style={{ textTransform: 'capitalize' }}>{userRole}</span>
+            </button>
 
             {/* UPGRADED LUXURY HAMBURGER MENU & SUITE DRAWER */}
             <HamburgerMenu
@@ -310,7 +421,7 @@ export default function App() {
         )}
 
         {/* ============================================================
-            1. VIP DASHBOARD COMMAND RIBBON (LIVE TELEMETRY)
+            1. VIP DASHBOARD COMMAND RIBBON (LIVE TELEMETRY & AFFILIATE)
             ============================================================ */}
         <div className="wl-dashboard-banner">
           <div className="wl-cmd-stats-row">
@@ -325,7 +436,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Active Garment */}
+            {/* Active Garment & Affiliate Buy Action */}
             <div className="wl-cmd-stat-item">
               <div className="wl-cmd-icon-box" style={{ color: 'var(--accent-cyan)', borderColor: 'rgba(0, 242, 254, 0.3)', background: 'rgba(0, 242, 254, 0.1)' }}>
                 <Tag style={{ width: 16, height: 16 }} />
@@ -378,20 +489,47 @@ export default function App() {
             </div>
           </div>
 
-          <button
-            onClick={() => runVirtualTryOn()}
-            disabled={isLoading}
-            className="wl-tool-btn"
-            style={{
-              background: 'linear-gradient(135deg, rgba(223, 178, 107, 0.2) 0%, rgba(223, 178, 107, 0.08) 100%)',
-              borderColor: 'var(--accent-gold)',
-              color: 'var(--accent-gold-light)',
-              fontWeight: 800
-            }}
-          >
-            <Sparkles style={{ width: 14, height: 14 }} />
-            {isLoading ? "Synthesizing..." : "Refresh Try-On"}
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            {/* Direct Affiliate Shop Button */}
+            <a
+              href={`https://www.${selectedBrand?.domain || 'zara.com'}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                textDecoration: 'none',
+                background: 'rgba(0, 242, 254, 0.1)',
+                border: '1px solid rgba(0, 242, 254, 0.4)',
+                color: 'var(--accent-cyan)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '8px 14px',
+                fontSize: '11px',
+                fontWeight: 800,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                transition: 'var(--transition-smooth)'
+              }}
+              title="Shop real item on official brand site with affiliate tracking"
+            >
+              <span>Shop on {selectedBrand?.name || "Zara"}</span>
+              <ExternalLink style={{ width: 12, height: 12 }} />
+            </a>
+
+            <button
+              onClick={() => runVirtualTryOn()}
+              disabled={isLoading}
+              className="wl-tool-btn"
+              style={{
+                background: 'linear-gradient(135deg, rgba(223, 178, 107, 0.2) 0%, rgba(223, 178, 107, 0.08) 100%)',
+                borderColor: 'var(--accent-gold)',
+                color: 'var(--accent-gold-light)',
+                fontWeight: 800
+              }}
+            >
+              <Sparkles style={{ width: 14, height: 14 }} />
+              {isLoading ? "Synthesizing..." : "Refresh Try-On"}
+            </button>
+          </div>
         </div>
 
         {/* ============================================================
@@ -700,6 +838,35 @@ export default function App() {
           </div>
         )}
       </main>
+
+      {/* Enterprise Modals */}
+      <MonetizationModal
+        isOpen={isMonetizationOpen}
+        onClose={() => setIsMonetizationOpen(false)}
+        currentPlan={userPlan}
+        quotaRemaining={quota.remaining}
+        quotaLimit={quota.limit}
+        onUpgradeSuccess={() => {
+          setUserPlan('pro');
+          setQuota({ used_today: 0, limit: 'Unlimited', remaining: 'Unlimited' });
+          setIsMonetizationOpen(false);
+          setErrorMessage(null);
+        }}
+        selectedProduct={selectedProduct}
+      />
+
+      <AiEngineModal
+        isOpen={isAiEngineOpen}
+        onClose={() => setIsAiEngineOpen(false)}
+      />
+
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        currentRole={userRole}
+        onSelectRole={(r) => setUserRole(r)}
+        history={tryonHistory}
+      />
 
       {/* Footer */}
       <footer style={{

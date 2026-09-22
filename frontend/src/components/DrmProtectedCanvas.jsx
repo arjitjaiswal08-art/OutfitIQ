@@ -69,6 +69,7 @@ export default function DrmProtectedCanvas({
   // Protected Interactions (Right-click prevention & Screenshot interceptor)
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // 1. Screenshot key prevention
       if (e.key === 'PrintScreen' || e.keyCode === 44) {
         e.preventDefault();
         setShieldMessage("Screen capture attempt logged under DRM security policy.");
@@ -79,6 +80,18 @@ export default function DrmProtectedCanvas({
       if (e.metaKey && e.shiftKey && ['3', '4', '5'].includes(e.key)) {
         e.preventDefault();
         setShieldMessage("macOS Screen capture shortcut intercepted.");
+        setShieldActive(true);
+        setTimeout(() => setShieldActive(false), 3000);
+        return;
+      }
+      // 2. DevTools & View Source prevention (F12, Ctrl+Shift+I, Cmd+Opt+I, Ctrl+U)
+      if (
+        e.key === 'F12' ||
+        ((e.ctrlKey || e.metaKey) && e.shiftKey && ['I', 'i', 'C', 'c', 'J', 'j'].includes(e.key)) ||
+        ((e.ctrlKey || e.metaKey) && ['U', 'u', 'S', 's'].includes(e.key))
+      ) {
+        e.preventDefault();
+        setShieldMessage("🔒 Developer Inspection tools & asset saving disabled on protected canvas.");
         setShieldActive(true);
         setTimeout(() => setShieldActive(false), 3000);
         return;
@@ -211,12 +224,13 @@ export default function DrmProtectedCanvas({
 
     // 4. Clean Bottom Status Ticker
     const sessionId = drmToken?.session_id || "WL-SEC-8821";
+    const userId = drmToken?.user_id || "USR-C9924A";
     ctx.save();
     ctx.fillStyle = "rgba(7, 9, 14, 0.92)";
     ctx.fillRect(0, height - 32, width, 32);
     ctx.fillStyle = "#dfb26b";
     ctx.font = "600 11px Plus Jakarta Sans, sans-serif";
-    ctx.fillText(`🔒 ENCRYPTED FEED • SESSION: ${sessionId} • ${liveTimestamp}`, 16, height - 12);
+    ctx.fillText(`🔒 ENCRYPTED FEED • USER: ${userId.toUpperCase()} • SESSION: ${sessionId} • PREVIEW ONLY • ${liveTimestamp}`, 16, height - 12);
     ctx.fillStyle = "#00f2fe";
     ctx.fillText(`PERSPECTIVE: ${selectedAngle.toUpperCase()} | SILHOUETTE: ${selectedFit.toUpperCase()} | SIZE: ${selectedSize}`, width - 350, height - 12);
     ctx.restore();
