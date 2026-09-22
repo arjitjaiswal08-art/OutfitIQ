@@ -53,3 +53,4 @@ wheels/
 *.sw?
 .vscode/
 .idea/
+.vercel
