@@ -19,8 +19,8 @@ export default function MonetizationModal({
   isOpen,
   onClose,
   currentPlan = 'free',
-  quotaRemaining = 2,
-  quotaLimit = 3,
+  quotaRemaining = 10,
+  quotaLimit = 10,
   onUpgradeSuccess,
   selectedProduct
 }) {
@@ -196,7 +196,7 @@ export default function MonetizationModal({
                       <Crown style={{ width: 15, height: 15 }} /> PRO ATELIER: UNLIMITED TRY-ONS ACTIVE
                     </span>
                   ) : (
-                    <span>Free Plan: {quotaRemaining} of {quotaLimit} Try-Ons Remaining Today</span>
+                    <span>Free Plan: {quotaRemaining} of {quotaLimit} Try-Ons Remaining per day</span>
                   )}
                 </div>
               </div>
@@ -246,7 +246,7 @@ export default function MonetizationModal({
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '12px', color: 'var(--text-secondary)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <CheckCircle2 style={{ width: 14, height: 14, color: '#10b981' }} />
-                      <span>3 Virtual Try-Ons per day</span>
+                      <span>10 Virtual Try-Ons per day</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <CheckCircle2 style={{ width: 14, height: 14, color: '#10b981' }} />

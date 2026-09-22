@@ -77,9 +77,9 @@ export default function App() {
   const [userPlan, setUserPlan] = useState('free');
   const [userRole, setUserRole] = useState('user');
   const [quota, setQuota] = useState({
-    used_today: 1,
-    limit: 3,
-    remaining: 2
+    used_today: 0,
+    limit: 10,
+    remaining: 10
   });
   const [tryonHistory, setTryonHistory] = useState([]);
 
@@ -351,7 +351,7 @@ export default function App() {
               }}
             >
               <Crown style={{ width: 13, height: 13 }} />
-              {userPlan === 'pro' ? "PRO ATELIER (UNLIMITED)" : `UPGRADE ₹299 (${quota.remaining}/3 LEFT)`}
+              {userPlan === 'pro' ? "PRO ATELIER (UNLIMITED)" : `UPGRADE ₹299 (${quota.remaining}/10 LEFT)`}
             </button>
 
             {/* 2. AI Engine Architecture Button */}

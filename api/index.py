@@ -54,8 +54,8 @@ async def vercel_routing_middleware(request: Request, call_next):
 # In-memory session store for Freemium quota and user history
 USER_STATE = {
     "plan": "free",
-    "tryons_today": 1,
-    "max_free_tryons": 3,
+    "tryons_today": 0,
+    "max_free_tryons": 10,
     "user_id": "usr_c9924a",
     "role": "user",
     "history": [
@@ -110,7 +110,7 @@ def root_info():
         "version": "2.0.0",
         "brands_supported": 29,
         "monetization": {
-            "free_tier_quota": 3,
+            "free_tier_quota": 10,
             "pro_tier_price_inr": "₹299/month",
             "affiliate_commission_rate": "8% - 15%"
         },
@@ -181,7 +181,7 @@ def run_virtual_try_on(req: TryOnRequest):
         if USER_STATE["tryons_today"] >= USER_STATE["max_free_tryons"]:
             return {
                 "status": "quota_exceeded",
-                "message": "Daily free limit reached (3/3 Try-Ons). Upgrade to Pro (₹299/mo) for unlimited instant GPU synthesis!",
+                "message": "Daily free limit reached (10/10 Try-Ons). Upgrade to Pro (₹299/mo) for unlimited instant GPU synthesis!",
                 "plan": USER_STATE["plan"],
                 "tryons_today": USER_STATE["tryons_today"],
                 "upgrade_url": "/api/billing/checkout"
@@ -348,7 +348,7 @@ def reset_free_quota():
         "status": "reset",
         "plan": "free",
         "tryons_today": 0,
-        "remaining": 3
+        "remaining": 10
     }
 
 # --- 🛍️ Affiliate Monetization Engine ---
