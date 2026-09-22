@@ -21,7 +21,7 @@ import {
 import DrmProtectedCanvas from './components/DrmProtectedCanvas';
 import BrandSelector from './components/BrandSelector';
 import ProductSelector from './components/ProductSelector';
-import UserPhotoStudio from './components/UserPhotoStudio';
+import UserPhotoStudio, { PRESET_MODELS } from './components/UserPhotoStudio';
 import FitControlsPanel from './components/FitControlsPanel';
 import VariationsGallery from './components/VariationsGallery';
 import PipelineStatus from './components/PipelineStatus';
@@ -33,6 +33,7 @@ export default function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [userImage, setUserImage] = useState(null);
   const [selectedPresetId, setSelectedPresetId] = useState('model_female_regular');
+  const [currentModelImage, setCurrentModelImage] = useState(PRESET_MODELS[0].image);
 
   // Active Dashboard Workspace View: 'dressing_room' | 'brands' | 'products' | 'analytics' | 'all'
   const [activeDashboardView, setActiveDashboardView] = useState('dressing_room');
@@ -84,8 +85,12 @@ export default function App() {
     setIsLoading(true);
     setErrorMessage(null);
 
+    const effectiveModel = overrideParams.userImage !== undefined
+      ? overrideParams.userImage
+      : (userImage || currentModelImage);
+
     const payload = {
-      user_image: overrideParams.userImage !== undefined ? overrideParams.userImage : userImage,
+      user_image: effectiveModel,
       selected_brand: selectedBrand?.id || 'zara',
       product_data: overrideParams.product || selectedProduct,
       gender: overrideParams.gender || gender,
@@ -118,7 +123,7 @@ export default function App() {
     } finally {
       setIsLoading(false);
     }
-  }, [selectedBrand, selectedProduct, userImage, gender, bodyType, posePreference, fitStyle, size, lighting, angle]);
+  }, [selectedBrand, selectedProduct, userImage, currentModelImage, gender, bodyType, posePreference, fitStyle, size, lighting, angle]);
 
   // Initial auto-run once product is ready
   useEffect(() => {
@@ -192,9 +197,10 @@ export default function App() {
   const handleSelectPreset = (preset) => {
     setSelectedPresetId(preset.id);
     setUserImage(null);
+    setCurrentModelImage(preset.image);
     setGender(preset.gender);
     setBodyType(preset.body_type);
-    runVirtualTryOn({ userImage: null, gender: preset.gender, bodyType: preset.body_type });
+    runVirtualTryOn({ userImage: preset.image, gender: preset.gender, bodyType: preset.body_type });
   };
 
   // Handle Variation Selection
@@ -472,8 +478,8 @@ export default function App() {
             {/* Left: Protected Canvas Viewport with Comparison Slider & Loupe */}
             <div id="wl-viewport-section">
               <DrmProtectedCanvas
-                primaryImage={activeImage || tryonResult?.primary_image}
-                beforeImage={tryonResult?.before_image}
+                primaryImage={activeImage || tryonResult?.primary_image || currentModelImage}
+                beforeImage={tryonResult?.before_image || currentModelImage}
                 drmToken={tryonResult?.meta?.drm_token}
                 isLoading={isLoading}
                 zoomActive={zoomActive}
@@ -493,7 +499,14 @@ export default function App() {
                   userImage={userImage}
                   onUserImageChange={(newImg) => {
                     setUserImage(newImg);
-                    runVirtualTryOn({ userImage: newImg });
+                    if (newImg) {
+                      setCurrentModelImage(newImg);
+                      runVirtualTryOn({ userImage: newImg });
+                    } else {
+                      const def = PRESET_MODELS.find(p => p.id === selectedPresetId)?.image || PRESET_MODELS[0].image;
+                      setCurrentModelImage(def);
+                      runVirtualTryOn({ userImage: def });
+                    }
                   }}
                   gender={gender}
                   onGenderChange={(g) => {

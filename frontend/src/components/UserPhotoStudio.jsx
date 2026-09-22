@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { Upload, User, Check, RefreshCw } from 'lucide-react';
 
-const PRESET_MODELS = [
+export const PRESET_MODELS = [
   {
     id: "model_female_regular",
     name: "Elena V.",

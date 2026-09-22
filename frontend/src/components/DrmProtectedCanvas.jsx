@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { Shield, Lock, ZoomIn, RefreshCw, AlertTriangle } from 'lucide-react';
+import { Shield, Lock, ZoomIn, RefreshCw, AlertTriangle, Eye } from 'lucide-react';
 
 export default function DrmProtectedCanvas({
   primaryImage,
@@ -21,10 +21,10 @@ export default function DrmProtectedCanvas({
   const [sliderPos, setSliderPos] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
 
-  // DRM & Anti-screenshot Shield State
-  const [isCaptureBlocked, setIsCaptureBlocked] = useState(false);
-  const [captureReason, setCaptureReason] = useState("");
-  const [loupeState, setLoupeState] = useState({ visible: false, x: 0, y: 0, normX: 0, normY: 0 });
+  // DRM Shield Notification
+  const [shieldActive, setShieldActive] = useState(false);
+  const [shieldMessage, setShieldMessage] = useState("");
+  const [loupeState, setLoupeState] = useState({ visible: false, x: 0, y: 0, normX: 0.5, normY: 0.5 });
 
   // Time-stamped live session watermark
   const [liveTimestamp, setLiveTimestamp] = useState(new Date().toLocaleTimeString());
@@ -40,7 +40,7 @@ export default function DrmProtectedCanvas({
     return () => clearInterval(timer);
   }, []);
 
-  // Preload Images
+  // Preload Primary Try-On Image
   useEffect(() => {
     if (primaryImage) {
       const img = new Image();
@@ -53,6 +53,7 @@ export default function DrmProtectedCanvas({
     }
   }, [primaryImage]);
 
+  // Preload Before Image
   useEffect(() => {
     if (beforeImage) {
       const img = new Image();
@@ -65,42 +66,21 @@ export default function DrmProtectedCanvas({
     }
   }, [beforeImage]);
 
-  // Anti-Screenshot & Screen Capture Trap
+  // Protected Interactions (Right-click prevention & Screenshot interceptor)
   useEffect(() => {
-    const triggerShield = (reason) => {
-      setIsCaptureBlocked(true);
-      setCaptureReason(reason);
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        triggerShield("Window/App focus lost. Screen capture guard triggered.");
-      }
-    };
-
-    const handleBlur = () => {
-      triggerShield("Application window blurred. Anti-capture shield active.");
-    };
-
     const handleKeyDown = (e) => {
       if (e.key === 'PrintScreen' || e.keyCode === 44) {
         e.preventDefault();
-        triggerShield("PrintScreen capture attempt intercepted.");
+        setShieldMessage("Screen capture attempt logged under DRM security policy.");
+        setShieldActive(true);
+        setTimeout(() => setShieldActive(false), 3000);
         return;
       }
       if (e.metaKey && e.shiftKey && ['3', '4', '5'].includes(e.key)) {
         e.preventDefault();
-        triggerShield("macOS screenshot shortcut (Cmd+Shift+3/4/5) blocked.");
-        return;
-      }
-      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 's') {
-        e.preventDefault();
-        triggerShield("Screen clipping shortcut intercepted.");
-        return;
-      }
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'C' || e.key === 'J')) {
-        e.preventDefault();
-        triggerShield("Developer Tools inspection blocked.");
+        setShieldMessage("macOS Screen capture shortcut intercepted.");
+        setShieldActive(true);
+        setTimeout(() => setShieldActive(false), 3000);
         return;
       }
     };
@@ -115,15 +95,11 @@ export default function DrmProtectedCanvas({
       return false;
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('blur', handleBlur);
     window.addEventListener('keydown', handleKeyDown);
     document.addEventListener('contextmenu', handleContextMenu);
     document.addEventListener('dragstart', handleDragStart);
 
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('blur', handleBlur);
       window.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('contextmenu', handleContextMenu);
       document.removeEventListener('dragstart', handleDragStart);
@@ -143,62 +119,110 @@ export default function DrmProtectedCanvas({
     ctx.clearRect(0, 0, width, height);
 
     const splitX = (sliderPos / 100) * width;
+    const activeTryon = tryonImgRef.current;
+    const activeBefore = beforeImgRef.current;
 
-    // 1. Draw "Before" image on left
-    if (beforeImgRef.current) {
+    // 1. Draw "Before" Image on the Left
+    if (activeBefore) {
       ctx.save();
       ctx.beginPath();
       ctx.rect(0, 0, splitX, height);
       ctx.clip();
-      ctx.drawImage(beforeImgRef.current, 0, 0, width, height);
-      
-      ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
-      ctx.fillRect(16, 16, 140, 32);
+      ctx.drawImage(activeBefore, 0, 0, width, height);
+
+      // Label
+      ctx.fillStyle = "rgba(10, 14, 22, 0.85)";
+      ctx.fillRect(16, 16, 136, 30);
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(16, 16, 136, 30);
       ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 13px Outfit, sans-serif";
-      ctx.fillText("ORIGINAL PHOTO", 24, 37);
+      ctx.font = "bold 12px Outfit, sans-serif";
+      ctx.fillText("ORIGINAL PHOTO", 24, 36);
+      ctx.restore();
+    } else {
+      // Dark neutral placeholder
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(0, 0, splitX, height);
+      ctx.clip();
+      ctx.fillStyle = "#0c1018";
+      ctx.fillRect(0, 0, width, height);
       ctx.restore();
     }
 
-    // 2. Draw "Virtual Try-On" image on right
-    if (tryonImgRef.current) {
+    // 2. Draw "AI Try-On" Image on the Right
+    const rightImg = activeTryon || activeBefore;
+    if (rightImg) {
       ctx.save();
       ctx.beginPath();
       ctx.rect(splitX, 0, width - splitX, height);
       ctx.clip();
-      ctx.drawImage(tryonImgRef.current, 0, 0, width, height);
+      ctx.drawImage(rightImg, 0, 0, width, height);
 
+      // Label
       ctx.fillStyle = "rgba(223, 178, 107, 0.95)";
-      ctx.fillRect(width - 170, 16, 154, 32);
+      ctx.fillRect(width - 156, 16, 140, 30);
       ctx.fillStyle = "#07090e";
-      ctx.font = "bold 13px Outfit, sans-serif";
-      ctx.fillText("AI TRY-ON ACTIVE", width - 156, 37);
+      ctx.font = "bold 12px Outfit, sans-serif";
+      ctx.fillText("AI TRY-ON ACTIVE", width - 144, 36);
       ctx.restore();
     }
 
-    // 3. Dynamic DRM Security Watermark Matrix
-    const sessionId = drmToken?.session_id || "WL-SEC-8821";
+    // 3. Golden Divider Line
     ctx.save();
-    ctx.font = "bold 12px Plus Jakarta Sans, sans-serif";
-    ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
-    ctx.rotate(-18 * Math.PI / 180);
-    for (let y = -200; y < height + 400; y += 130) {
-      for (let x = -200; x < width + 300; x += 320) {
-        ctx.fillText(`PREVIEW ONLY • DRM PROTECTED • ${sessionId}`, x, y);
-      }
-    }
+    ctx.strokeStyle = "rgba(223, 178, 107, 0.95)";
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = "rgba(223, 178, 107, 0.6)";
+    ctx.shadowBlur = 10;
+    ctx.beginPath();
+    ctx.moveTo(splitX, 0);
+    ctx.lineTo(splitX, height);
+    ctx.stroke();
+
+    // Center Handle Circle
+    const handleY = height / 2;
+    ctx.fillStyle = "#dfb26b";
+    ctx.beginPath();
+    ctx.arc(splitX, handleY, 18, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Arrows on handle
+    ctx.fillStyle = "#07090e";
+    ctx.font = "bold 14px sans-serif";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("↔", splitX, handleY);
     ctx.restore();
 
-    // 4. Bottom Stream Bar
+    // 4. Subtle Luxury DRM Corner Seal
+    const sessionId = drmToken?.session_id || "WL-SEC-8821";
+    ctx.save();
+    ctx.fillStyle = "rgba(7, 9, 14, 0.75)";
+    ctx.fillRect(width - 240, height - 60, 224, 22);
+    ctx.strokeStyle = "rgba(223, 178, 107, 0.4)";
+    ctx.lineWidth = 1;
+    ctx.strokeRect(width - 240, height - 60, 224, 22);
+    ctx.fillStyle = "#dfb26b";
+    ctx.font = "600 10px Plus Jakarta Sans, sans-serif";
+    ctx.fillText(`🔒 WEARLYTICS DRM • ${sessionId}`, width - 232, height - 45);
+    ctx.restore();
+
+    // 5. Bottom Status Ticker
+    ctx.save();
     ctx.fillStyle = "rgba(7, 9, 14, 0.92)";
     ctx.fillRect(0, height - 32, width, 32);
     ctx.fillStyle = "#dfb26b";
     ctx.font = "600 11px Plus Jakarta Sans, sans-serif";
-    ctx.fillText(`🔒 WEARLYTICS DRM ENCRYPTED FEED • SESSION: ${sessionId} • ${liveTimestamp}`, 16, height - 12);
+    ctx.fillText(`🔒 ENCRYPTED FEED • SESSION: ${sessionId} • ${liveTimestamp}`, 16, height - 12);
     ctx.fillStyle = "#00f2fe";
-    ctx.fillText(`PERSPECTIVE: ${selectedAngle.toUpperCase()} | SILHOUETTE: ${selectedFit.toUpperCase()} | SIZE: ${selectedSize}`, width - 360, height - 12);
+    ctx.fillText(`PERSPECTIVE: ${selectedAngle.toUpperCase()} | SILHOUETTE: ${selectedFit.toUpperCase()} | SIZE: ${selectedSize}`, width - 350, height - 12);
+    ctx.restore();
 
-    // Update Loupe if active
+    // Update Loupe if Active
     if (zoomActive && loupeState.visible && loupeCanvasRef.current) {
       drawLoupe();
     }
@@ -208,7 +232,7 @@ export default function DrmProtectedCanvas({
     drawCanvas();
   }, [drawCanvas]);
 
-  // Loupe Zoom Drawing
+  // Loupe Magnifier Drawing
   const drawLoupe = () => {
     const lCanvas = loupeCanvasRef.current;
     if (!lCanvas) return;
@@ -216,10 +240,10 @@ export default function DrmProtectedCanvas({
     if (!lCtx) return;
 
     lCtx.clearRect(0, 0, lCanvas.width, lCanvas.height);
-    const srcImg = (sliderPos < 50) ? tryonImgRef.current : (tryonImgRef.current || beforeImgRef.current);
+    const srcImg = (sliderPos < 50) ? (tryonImgRef.current || beforeImgRef.current) : (tryonImgRef.current || beforeImgRef.current);
     if (!srcImg) return;
 
-    const zoomFactor = 2.5;
+    const zoomFactor = 2.6;
     const srcW = lCanvas.width / zoomFactor;
     const srcH = lCanvas.height / zoomFactor;
     const srcX = Math.max(0, Math.min(srcImg.width - srcW, loupeState.normX * srcImg.width - srcW / 2));
@@ -227,11 +251,20 @@ export default function DrmProtectedCanvas({
 
     lCtx.drawImage(srcImg, srcX, srcY, srcW, srcH, 0, 0, lCanvas.width, lCanvas.height);
 
-    lCtx.strokeStyle = "rgba(223, 178, 107, 0.5)";
+    // Target reticle
+    lCtx.strokeStyle = "rgba(223, 178, 107, 0.7)";
     lCtx.lineWidth = 1.5;
     lCtx.beginPath();
-    lCtx.arc(lCanvas.width / 2, lCanvas.height / 2, 22, 0, 2 * Math.PI);
+    lCtx.arc(lCanvas.width / 2, lCanvas.height / 2, 24, 0, 2 * Math.PI);
     lCtx.stroke();
+  };
+
+  const updateSlider = (e) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const pos = ((clientX - rect.left) / rect.width) * 100;
+    setSliderPos(Math.max(5, Math.min(95, pos)));
   };
 
   const handlePointerDown = (e) => {
@@ -245,8 +278,10 @@ export default function DrmProtectedCanvas({
     }
     if (containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
       const normX = Math.max(0, Math.min(1, x / rect.width));
       const normY = Math.max(0, Math.min(1, y / rect.height));
 
@@ -264,30 +299,16 @@ export default function DrmProtectedCanvas({
     setIsDragging(false);
   };
 
-  const handlePointerLeave = () => {
-    setIsDragging(false);
-    setLoupeState(prev => ({ ...prev, visible: false }));
-  };
-
-  const updateSlider = (e) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const clientX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
-    const offsetX = clientX - rect.left;
-    const percent = Math.max(0, Math.min(100, (offsetX / rect.width) * 100));
-    setSliderPos(percent);
-  };
-
   return (
     <div className="wl-viewport-card">
-      {/* Top Toolbar */}
+      {/* Viewport Top Toolbar */}
       <div className="wl-viewport-toolbar">
         <div className="wl-toolbar-group">
-          <span className="wl-badge wl-badge-drm">
-            <Lock style={{ width: 13, height: 13 }} /> HARDWARE DRM ACTIVE
+          <span className="wl-badge wl-badge-drm" style={{ fontSize: '11px' }}>
+            <Lock style={{ width: 12, height: 12 }} /> HARDWARE DRM ACTIVE
           </span>
-          <span className="wl-badge wl-badge-gold">
-            <Shield style={{ width: 13, height: 13 }} /> SCREEN SHIELD ENGAGED
+          <span className="wl-badge wl-badge-gold" style={{ fontSize: '11px' }}>
+            <Shield style={{ width: 12, height: 12 }} /> NEURAL COUTURE ENGINE
           </span>
         </div>
 
@@ -295,89 +316,96 @@ export default function DrmProtectedCanvas({
           <button
             onClick={() => setZoomActive(!zoomActive)}
             className={`wl-tool-btn ${zoomActive ? 'active' : ''}`}
-            title="Inspect fabric weave and stitching"
+            title="Inspect Fabric Texture (2.6x Optical Zoom)"
           >
-            <ZoomIn style={{ width: 14, height: 14, color: 'var(--accent-gold)' }} />
-            {zoomActive ? "Loupe Active (2.5x)" : "Inspection Loupe"}
+            <ZoomIn style={{ width: 14, height: 14 }} />
+            {zoomActive ? "Close Loupe" : "Inspection Loupe"}
           </button>
+
           <button
             onClick={() => setSliderPos(50)}
             className="wl-tool-btn"
-            title="Reset to 50/50 comparison"
+            title="Reset Split (50/50)"
           >
-            <RefreshCw style={{ width: 14, height: 14 }} />
+            <RefreshCw style={{ width: 13, height: 13 }} />
           </button>
         </div>
       </div>
 
-      {/* Main Viewport Box */}
+      {/* Main Interactive Canvas Comparison Box */}
       <div
         ref={containerRef}
         className="wl-canvas-box"
         onMouseDown={handlePointerDown}
         onMouseMove={handlePointerMove}
         onMouseUp={handlePointerUp}
-        onMouseLeave={handlePointerLeave}
         onTouchStart={handlePointerDown}
         onTouchMove={handlePointerMove}
         onTouchEnd={handlePointerUp}
+        style={{ cursor: isDragging ? 'ew-resize' : 'default', position: 'relative', overflow: 'hidden' }}
       >
-        {/* HTML5 Protected Canvas */}
         <canvas
           ref={canvasRef}
-          width={768}
-          height={1024}
-          className="wl-render-canvas"
+          width={680}
+          height={850}
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'block',
+            objectFit: 'contain',
+            borderRadius: 'var(--radius-md)'
+          }}
         />
 
-        {/* Dynamic Watermark Drift Overlay */}
-        <div className="wl-watermark-drift">
-          <div className="wl-watermark-item">
-            PREVIEW ONLY • WEARLYTICS DRM • {drmToken?.session_id || "WL-001"} • {liveTimestamp}
-          </div>
-          <div className="wl-watermark-item">
-            CONFIDENTIAL AI TRY-ON PREVIEW • UNAUTHORIZED CAPTURE PROHIBITED
-          </div>
-          <div className="wl-watermark-item">
-            WEARLYTICS SECURE STREAM • ALL RIGHTS RESERVED
-          </div>
-        </div>
-
-        {/* Draggable Divider Line */}
-        <div
-          className="wl-divider-line"
-          style={{ left: `${sliderPos}%` }}
-        >
-          <div className="wl-divider-grip">
-            ↔
-          </div>
-        </div>
-
-        {/* Inspection Loupe */}
+        {/* Loupe Floating Magnifier Window */}
         {zoomActive && loupeState.visible && (
           <div
-            className="wl-zoom-loupe"
             style={{
-              left: `${loupeState.x - 80}px`,
-              top: `${loupeState.y - 80}px`,
+              position: 'absolute',
+              left: `${Math.min(loupeState.x + 20, 680 - 180)}px`,
+              top: `${Math.max(10, Math.min(loupeState.y - 80, 850 - 180))}px`,
+              width: '170px',
+              height: '170px',
+              borderRadius: '50%',
+              border: '2.5px solid var(--accent-gold)',
+              boxShadow: '0 12px 36px rgba(0, 0, 0, 0.8), 0 0 20px var(--accent-gold-glow)',
+              pointerEvents: 'none',
+              zIndex: 50,
+              overflow: 'hidden',
+              background: '#07090e'
             }}
           >
             <canvas
               ref={loupeCanvasRef}
-              width={160}
-              height={160}
+              width={170}
+              height={170}
               style={{ width: '100%', height: '100%' }}
             />
+            <div style={{
+              position: 'absolute',
+              bottom: '8px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: 'rgba(7, 9, 14, 0.85)',
+              padding: '2px 8px',
+              borderRadius: '10px',
+              fontSize: '10px',
+              color: 'var(--accent-gold-light)',
+              fontWeight: 700,
+              whiteSpace: 'nowrap'
+            }}>
+              2.6x FABRIC LOUPE
+            </div>
           </div>
         )}
 
-        {/* Loading Pipeline Hologram Overlay */}
+        {/* Loading Pipeline Shimmer Overlay */}
         {isLoading && (
           <div style={{
             position: 'absolute',
             inset: 0,
-            background: 'rgba(5, 7, 10, 0.85)',
-            backdropFilter: 'blur(16px)',
+            background: 'rgba(5, 7, 10, 0.75)',
+            backdropFilter: 'blur(10px)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -387,77 +415,54 @@ export default function DrmProtectedCanvas({
             textAlign: 'center'
           }}>
             <div style={{
-              width: '64px',
-              height: '64px',
+              width: '54px',
+              height: '54px',
               borderRadius: '50%',
               border: '3px solid rgba(223, 178, 107, 0.2)',
               borderTopColor: 'var(--accent-gold)',
-              animation: 'spin 1s linear infinite',
-              marginBottom: '18px'
+              animation: 'spin 0.8s linear infinite',
+              marginBottom: '16px'
             }} />
-            <h4 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '18px', color: 'var(--accent-gold-light)' }}>
+            <h4 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '17px', color: 'var(--accent-gold-light)' }}>
               Neural Try-On Synthesizer
             </h4>
             <p style={{ fontSize: '12px', color: 'var(--text-secondary)', maxWidth: '300px', marginTop: '6px' }}>
-              Fitting garment mesh, aligning pose keypoints, and synthesizing photorealistic drapery...
+              Fitting garment mesh, contouring shoulder seams, and calculating photometric drape...
             </p>
           </div>
         )}
 
-        {/* DRM SCREEN CAPTURE BLOCKED SHIELD */}
-        {isCaptureBlocked && (
+        {/* Temporary Screenshot Alert Banner (Non-Blocking) */}
+        {shieldActive && (
           <div style={{
             position: 'absolute',
-            inset: 0,
-            background: 'rgba(5, 7, 10, 0.96)',
-            backdropFilter: 'blur(28px)',
+            top: '20px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'rgba(244, 63, 94, 0.95)',
+            color: '#ffffff',
+            padding: '10px 20px',
+            borderRadius: '20px',
+            fontSize: '12px',
+            fontWeight: 700,
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 100,
-            padding: '32px',
-            textAlign: 'center',
-            border: '2px dashed rgba(244, 63, 94, 0.5)'
+            gap: '8px',
+            zIndex: 90,
+            boxShadow: '0 8px 24px rgba(244, 63, 94, 0.4)'
           }}>
-            <div style={{
-              width: '64px',
-              height: '64px',
-              borderRadius: '50%',
-              background: 'rgba(244, 63, 94, 0.15)',
-              border: '1px solid #f43f5e',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#f43f5e',
-              marginBottom: '16px'
-            }}>
-              <AlertTriangle style={{ width: 32, height: 32 }} />
-            </div>
-            <h3 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '20px', color: '#fff' }}>
-              SCREEN CAPTURE BLOCKED
-            </h3>
-            <p style={{ fontSize: '13px', color: '#fda4af', maxWidth: '420px', margin: '8px 0 16px 0', fontFamily: 'monospace' }}>
-              {captureReason}
-            </p>
-            <p style={{ fontSize: '12px', color: 'var(--text-muted)', maxWidth: '360px', marginBottom: '24px' }}>
-              Wearlytics strictly protects designer apparel assets against screen scraping and unauthorized capture.
-            </p>
-            <button
-              onClick={() => setIsCaptureBlocked(false)}
-              className="wl-btn-extract"
-              style={{ fontSize: '13px', padding: '10px 24px' }}
-            >
-              Resume Secure Session
-            </button>
+            <AlertTriangle style={{ width: 16, height: 16 }} />
+            {shieldMessage}
           </div>
         )}
       </div>
 
       {/* Comparison Helper Bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--text-muted)', marginTop: '10px' }}>
-        <span>← Drag center divider to compare Original vs AI Fit →</span>
-        <span style={{ color: 'var(--accent-gold-light)', fontWeight: 700 }}>Split: {Math.round(sliderPos)}% / {100 - Math.round(sliderPos)}%</span>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--text-muted)', marginTop: '12px' }}>
+        <span>← Drag center divider to compare Original Model vs AI Fit →</span>
+        <span style={{ color: 'var(--accent-gold-light)', fontWeight: 700 }}>
+          Split: {Math.round(sliderPos)}% / {100 - Math.round(sliderPos)}%
+        </span>
       </div>
     </div>
   );
