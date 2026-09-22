@@ -16,7 +16,11 @@ import {
   RotateCw,
   Sun,
   Sunset,
-  Moon
+  Moon,
+  ArrowDownCircle,
+  Eye,
+  CheckCircle2,
+  Building2
 } from 'lucide-react';
 import DrmProtectedCanvas from './components/DrmProtectedCanvas';
 import BrandSelector from './components/BrandSelector';
@@ -214,6 +218,14 @@ export default function App() {
   // Quick brand strip top picks
   const quickPicks = ["Zara", "Nike", "Adidas", "Uniqlo", "Levi’s", "Gucci", "Louis Vuitton", "FabIndia", "Burberry", "Prada"];
 
+  // Smooth jump scroll helper
+  const scrollToSection = (id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-black)', position: 'relative' }}>
       {/* Background Atmosphere */}
@@ -383,7 +395,7 @@ export default function App() {
         </div>
 
         {/* ============================================================
-            2. DASHBOARD VIEW SWITCHER (STREAMLINED WORKSPACE)
+            2. DASHBOARD VIEW SWITCHER (STREAMLINED 5-MODE WORKSPACE)
             ============================================================ */}
         <div className="wl-view-switcher">
           <button
@@ -427,7 +439,7 @@ export default function App() {
           </button>
         </div>
 
-        {/* Quick Floating Brand Strip (shown in dressing room view) */}
+        {/* Quick Floating Brand Strip (shown in dressing room view or full showcase) */}
         {(activeDashboardView === 'dressing_room' || activeDashboardView === 'all') && (
           <div className="wl-quick-brand-strip">
             <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--accent-gold-light)', display: 'flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
@@ -448,9 +460,187 @@ export default function App() {
           </div>
         )}
 
-        {/* VIEW 1: BRAND SHOWCASE (Show if 'brands' or 'all') */}
+        {/* ============================================================
+            FULL SHOWCASE VIEW: TOP HERO BANNER & IN-PAGE JUMP DOCK
+            ============================================================ */}
+        {activeDashboardView === 'all' && (
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(223, 178, 107, 0.12) 0%, rgba(0, 242, 254, 0.08) 50%, rgba(16, 20, 32, 0.9) 100%)',
+            border: '1px solid var(--border-gold)',
+            borderRadius: 'var(--radius-lg)',
+            padding: '24px 28px',
+            marginBottom: '26px',
+            boxShadow: '0 16px 40px rgba(0,0,0,0.6)'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <span className="wl-badge wl-badge-gold">
+                    <Sparkles style={{ width: 13, height: 13 }} /> HAUTE COUTURE RUNWAY SHOWCASE
+                  </span>
+                  <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
+                    End-to-End Enterprise Virtual Try-On Suite
+                  </span>
+                </div>
+                <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '24px', fontWeight: 800, color: '#fff' }}>
+                  Unified Atelier & Neural Draping Showcase
+                </h2>
+                <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px', maxWidth: '750px' }}>
+                  Explore all five interconnected modules: Interactive Split-Canvas Dressing Room, 29 Global Fashion Houses Directory, Curated Garment Rack & Live URL Scraper, and Photometric Ambiance Gallery with Neural Pipeline telemetry.
+                </p>
+              </div>
+
+              {/* Jump Navigation Pills */}
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => scrollToSection('wl-dressing-room-section')}
+                  className="wl-tool-btn"
+                  style={{ fontSize: '11px', background: 'rgba(10, 14, 24, 0.8)' }}
+                >
+                  <Compass style={{ width: 12, height: 12 }} /> 1. Dressing Room
+                </button>
+                <button
+                  onClick={() => scrollToSection('wl-brand-section')}
+                  className="wl-tool-btn"
+                  style={{ fontSize: '11px', background: 'rgba(10, 14, 24, 0.8)' }}
+                >
+                  <Building2 style={{ width: 12, height: 12 }} /> 2. 29 Houses
+                </button>
+                <button
+                  onClick={() => scrollToSection('wl-product-section')}
+                  className="wl-tool-btn"
+                  style={{ fontSize: '11px', background: 'rgba(10, 14, 24, 0.8)' }}
+                >
+                  <Tag style={{ width: 12, height: 12 }} /> 3. Garments
+                </button>
+                <button
+                  onClick={() => scrollToSection('wl-analytics-section')}
+                  className="wl-tool-btn"
+                  style={{ fontSize: '11px', background: 'rgba(10, 14, 24, 0.8)' }}
+                >
+                  <Cpu style={{ width: 12, height: 12 }} /> 4. Photometrics
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ============================================================
+            MODULE 1: VIRTUAL DRESSING ROOM VIEWPORT & CONTROLS
+            (Visible when 'dressing_room' or 'all')
+            ============================================================ */}
+        {(activeDashboardView === 'dressing_room' || activeDashboardView === 'all') && (
+          <div id="wl-dressing-room-section" style={{ marginBottom: activeDashboardView === 'all' ? '36px' : '0' }}>
+            {activeDashboardView === 'all' && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+                <span className="wl-badge wl-badge-gold">MODULE 01</span>
+                <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '18px', fontWeight: 800, color: '#fff' }}>
+                  Interactive Canvas Viewport & Precision Atelier
+                </h3>
+              </div>
+            )}
+
+            <div className="wl-workspace-layout">
+              {/* Left: Protected Canvas Viewport with Comparison Slider & Loupe */}
+              <div id="wl-viewport-section">
+                <DrmProtectedCanvas
+                  primaryImage={activeImage || tryonResult?.primary_image || currentModelImage}
+                  beforeImage={tryonResult?.before_image || currentModelImage}
+                  drmToken={tryonResult?.meta?.drm_token}
+                  isLoading={isLoading}
+                  zoomActive={zoomActive}
+                  setZoomActive={setZoomActive}
+                  onResetZoom={() => setZoomActive(false)}
+                  selectedAngle={angle}
+                  selectedFit={fitStyle}
+                  selectedSize={size}
+                />
+              </div>
+
+              {/* Right: Studio Configuration & Controls */}
+              <div className="wl-controls-column">
+                {/* User Persona & Model Studio */}
+                <div id="wl-model-section">
+                  <UserPhotoStudio
+                    userImage={userImage}
+                    onUserImageChange={(newImg) => {
+                      setUserImage(newImg);
+                      if (newImg) {
+                        setCurrentModelImage(newImg);
+                        runVirtualTryOn({ userImage: newImg });
+                      } else {
+                        const def = PRESET_MODELS.find(p => p.id === selectedPresetId)?.image || PRESET_MODELS[0].image;
+                        setCurrentModelImage(def);
+                        runVirtualTryOn({ userImage: def });
+                      }
+                    }}
+                    gender={gender}
+                    onGenderChange={(g) => {
+                      setGender(g);
+                      runVirtualTryOn({ gender: g });
+                    }}
+                    bodyType={bodyType}
+                    onBodyTypeChange={(bt) => {
+                      setBodyType(bt);
+                      runVirtualTryOn({ bodyType: bt });
+                    }}
+                    posePreference={posePreference}
+                    onPosePreferenceChange={(pp) => {
+                      setPosePreference(pp);
+                      runVirtualTryOn({ posePreference: pp });
+                    }}
+                    selectedPresetId={selectedPresetId}
+                    onSelectPreset={handleSelectPreset}
+                  />
+                </div>
+
+                {/* Sizing, Silhouette & Perspectives */}
+                <div id="wl-fit-section">
+                  <FitControlsPanel
+                    fitStyle={fitStyle}
+                    onFitStyleChange={(f) => {
+                      setFitStyle(f);
+                      runVirtualTryOn({ fitStyle: f });
+                    }}
+                    size={size}
+                    onSizeChange={(s) => {
+                      setSize(s);
+                      runVirtualTryOn({ size: s });
+                    }}
+                    lighting={lighting}
+                    onLightingChange={(l) => {
+                      setLighting(l);
+                      runVirtualTryOn({ lighting: l });
+                    }}
+                    angle={angle}
+                    onAngleChange={(a) => {
+                      setAngle(a);
+                      runVirtualTryOn({ angle: a });
+                    }}
+                    onRunTryOn={() => runVirtualTryOn()}
+                    isLoading={isLoading}
+                    tensionIndex={tryonResult?.meta?.drape_tension_index}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ============================================================
+            MODULE 2: 29 FASHION HOUSES DIRECTORY
+            (Visible when 'brands' or 'all')
+            ============================================================ */}
         {(activeDashboardView === 'brands' || activeDashboardView === 'all') && (
-          <div id="wl-brand-section">
+          <div id="wl-brand-section" style={{ marginBottom: activeDashboardView === 'all' ? '36px' : '0' }}>
+            {activeDashboardView === 'all' && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+                <span className="wl-badge wl-badge-cyan">MODULE 02</span>
+                <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '18px', fontWeight: 800, color: '#fff' }}>
+                  29 Global Fashion Houses Directory
+                </h3>
+              </div>
+            )}
             <BrandSelector
               brands={brands}
               selectedBrand={selectedBrand}
@@ -459,9 +649,20 @@ export default function App() {
           </div>
         )}
 
-        {/* VIEW 2: PRODUCT SELECTOR & URL SCRAPER (Show if 'products' or 'all') */}
+        {/* ============================================================
+            MODULE 3: GARMENT RACK & LIVE URL SCRAPER
+            (Visible when 'products' or 'all')
+            ============================================================ */}
         {(activeDashboardView === 'products' || activeDashboardView === 'all') && (
-          <div id="wl-product-section">
+          <div id="wl-product-section" style={{ marginBottom: activeDashboardView === 'all' ? '36px' : '0' }}>
+            {activeDashboardView === 'all' && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+                <span className="wl-badge wl-badge-gold">MODULE 03</span>
+                <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '18px', fontWeight: 800, color: '#fff' }}>
+                  Signature Garment Rack & Live Neural URL Extractor
+                </h3>
+              </div>
+            )}
             <ProductSelector
               selectedBrand={selectedBrand}
               selectedProduct={selectedProduct}
@@ -472,100 +673,23 @@ export default function App() {
           </div>
         )}
 
-        {/* VIEW 3: MAIN DRESSING ROOM VIEWPORT & CONTROLS (Always show in 'dressing_room' or 'all') */}
-        {(activeDashboardView === 'dressing_room' || activeDashboardView === 'all') && (
-          <div className="wl-workspace-layout">
-            {/* Left: Protected Canvas Viewport with Comparison Slider & Loupe */}
-            <div id="wl-viewport-section">
-              <DrmProtectedCanvas
-                primaryImage={activeImage || tryonResult?.primary_image || currentModelImage}
-                beforeImage={tryonResult?.before_image || currentModelImage}
-                drmToken={tryonResult?.meta?.drm_token}
-                isLoading={isLoading}
-                zoomActive={zoomActive}
-                setZoomActive={setZoomActive}
-                onResetZoom={() => setZoomActive(false)}
-                selectedAngle={angle}
-                selectedFit={fitStyle}
-                selectedSize={size}
-              />
-            </div>
-
-            {/* Right: Studio Configuration & Controls */}
-            <div className="wl-controls-column">
-              {/* User Persona & Model Studio */}
-              <div id="wl-model-section">
-                <UserPhotoStudio
-                  userImage={userImage}
-                  onUserImageChange={(newImg) => {
-                    setUserImage(newImg);
-                    if (newImg) {
-                      setCurrentModelImage(newImg);
-                      runVirtualTryOn({ userImage: newImg });
-                    } else {
-                      const def = PRESET_MODELS.find(p => p.id === selectedPresetId)?.image || PRESET_MODELS[0].image;
-                      setCurrentModelImage(def);
-                      runVirtualTryOn({ userImage: def });
-                    }
-                  }}
-                  gender={gender}
-                  onGenderChange={(g) => {
-                    setGender(g);
-                    runVirtualTryOn({ gender: g });
-                  }}
-                  bodyType={bodyType}
-                  onBodyTypeChange={(bt) => {
-                    setBodyType(bt);
-                    runVirtualTryOn({ bodyType: bt });
-                  }}
-                  posePreference={posePreference}
-                  onPosePreferenceChange={(pp) => {
-                    setPosePreference(pp);
-                    runVirtualTryOn({ posePreference: pp });
-                  }}
-                  selectedPresetId={selectedPresetId}
-                  onSelectPreset={handleSelectPreset}
-                />
-              </div>
-
-              {/* Sizing, Silhouette & Perspectives */}
-              <div id="wl-fit-section">
-                <FitControlsPanel
-                  fitStyle={fitStyle}
-                  onFitStyleChange={(f) => {
-                    setFitStyle(f);
-                    runVirtualTryOn({ fitStyle: f });
-                  }}
-                  size={size}
-                  onSizeChange={(s) => {
-                    setSize(s);
-                    runVirtualTryOn({ size: s });
-                  }}
-                  lighting={lighting}
-                  onLightingChange={(l) => {
-                    setLighting(l);
-                    runVirtualTryOn({ lighting: l });
-                  }}
-                  angle={angle}
-                  onAngleChange={(a) => {
-                    setAngle(a);
-                    runVirtualTryOn({ angle: a });
-                  }}
-                  onRunTryOn={() => runVirtualTryOn()}
-                  isLoading={isLoading}
-                  tensionIndex={tryonResult?.meta?.drape_tension_index}
-                />
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* AI Pipeline Step Visualizer */}
         <PipelineStatus isRunning={isLoading} />
 
-        {/* VIEW 4: PHOTOMETRIC VARIATIONS & TECH SPECS (Show if 'analytics', 'dressing_room', or 'all') */}
+        {/* ============================================================
+            MODULE 4: PHOTOMETRIC VARIATIONS & TECH SPECS
+            (Visible when 'analytics' or 'dressing_room' or 'all')
+            ============================================================ */}
         {(activeDashboardView === 'analytics' || activeDashboardView === 'dressing_room' || activeDashboardView === 'all') && (
-          <div id="wl-analytics-section">
+          <div id="wl-analytics-section" style={{ marginBottom: activeDashboardView === 'all' ? '36px' : '0' }}>
+            {activeDashboardView === 'all' && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+                <span className="wl-badge wl-badge-cyan">MODULE 04</span>
+                <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '18px', fontWeight: 800, color: '#fff' }}>
+                  Photometric Radiance Profiles & Fabric Telemetry
+                </h3>
+              </div>
+            )}
             <VariationsGallery
               variations={tryonResult?.variations}
               activeVariationId={activeVariationId}
@@ -580,16 +704,17 @@ export default function App() {
       {/* Footer */}
       <footer style={{
         borderTop: '1px solid var(--border-subtle)',
-        padding: '24px 16px',
+        padding: '28px 16px',
         textAlign: 'center',
         fontSize: '12px',
-        color: 'var(--text-muted)'
+        color: 'var(--text-muted)',
+        background: 'rgba(4, 6, 10, 0.95)'
       }}>
-        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-          Wearlytics AI Virtual Dressing Room • Preview Only • Enterprise neural cloth deformation, landmark pose estimation, and 29-brand visualization.
+        <div style={{ maxWidth: '640px', margin: '0 auto', lineHeight: 1.6 }}>
+          Wearlytics AI Virtual Dressing Room • Enterprise Neural Cloth Deformation, Landmark Pose Estimation, and 29 Global Fashion Houses Visualization.
         </div>
-        <div style={{ marginTop: '6px', fontSize: '11px', color: 'var(--accent-gold-light)' }}>
-          🔒 Hardware DRM & Anti-Screenshot Shield active across all stream buffers.
+        <div style={{ marginTop: '8px', fontSize: '11px', color: 'var(--accent-gold-light)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+          <Lock style={{ width: 12, height: 12 }} /> Hardware DRM & Cryptographic Session Protection active across all pipeline stream buffers.
         </div>
       </footer>
     </div>
