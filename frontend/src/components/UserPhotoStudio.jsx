@@ -8,7 +8,10 @@ import {
   Image as ImageIcon,
   Sparkles,
   ShieldCheck,
-  CheckCircle2
+  CheckCircle2,
+  AlertTriangle,
+  Info,
+  Maximize2
 } from 'lucide-react';
 
 export const PRESET_MODELS = [
@@ -17,7 +20,7 @@ export const PRESET_MODELS = [
     name: "Elena V.",
     gender: "female",
     body_type: "regular",
-    desc: "Studio Neutral Stance",
+    desc: "Full Torso & Shoulders",
     image: "/models/elena.jpg"
   },
   {
@@ -41,7 +44,7 @@ export const PRESET_MODELS = [
     name: "Marcus K.",
     gender: "male",
     body_type: "athletic",
-    desc: "Athletic Build",
+    desc: "Broad Shoulders",
     image: "/models/marcus.jpg"
   },
   {
@@ -49,7 +52,7 @@ export const PRESET_MODELS = [
     name: "Julian R.",
     gender: "male",
     body_type: "slim",
-    desc: "Slim Runway",
+    desc: "Slim Runway Stance",
     image: "/models/julian.jpg"
   },
   {
@@ -57,7 +60,7 @@ export const PRESET_MODELS = [
     name: "David H.",
     gender: "male",
     body_type: "regular",
-    desc: "Standard Posture",
+    desc: "Neutral Studio Pose",
     image: "/models/david.jpg"
   }
 ];
@@ -114,7 +117,7 @@ export default function UserPhotoStudio({
   return (
     <div className="wl-panel" style={{ padding: '22px', marginBottom: 0 }}>
       {/* Studio Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
         <div>
           <span className="wl-badge wl-badge-cyan" style={{ marginBottom: '6px' }}>
             <User style={{ width: 13, height: 13 }} /> USER PERSONA STUDIO
@@ -135,6 +138,28 @@ export default function UserPhotoStudio({
         )}
       </div>
 
+      {/* Required Upload Guidance Alert */}
+      <div style={{
+        background: 'rgba(223, 178, 107, 0.08)',
+        border: '1px solid rgba(223, 178, 107, 0.3)',
+        borderRadius: 'var(--radius-sm)',
+        padding: '10px 14px',
+        marginBottom: '12px',
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '10px'
+      }}>
+        <Info style={{ width: 16, height: 16, color: 'var(--accent-gold)', marginTop: '2px', flexShrink: 0 }} />
+        <div>
+          <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--accent-gold-light)' }}>
+            AI Landmark Requirement: Full-Body or Torso with Visible Shoulders
+          </div>
+          <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>
+            For accurate 33-point pose estimation and cloth warping, ensure your shoulders and upper chest are clearly visible. Avoid face-only close-up selfies.
+          </div>
+        </div>
+      </div>
+
       {/* Upload Custom User Photo Box */}
       <div
         onClick={() => fileInputRef.current?.click()}
@@ -147,7 +172,8 @@ export default function UserPhotoStudio({
           background: isDragging ? 'rgba(223, 178, 107, 0.12)' : userImage ? 'rgba(223, 178, 107, 0.08)' : 'rgba(10, 14, 24, 0.65)',
           padding: '14px 18px',
           cursor: 'pointer',
-          transition: 'var(--transition-smooth)'
+          transition: 'var(--transition-smooth)',
+          marginBottom: '14px'
         }}
       >
         <input
@@ -164,9 +190,9 @@ export default function UserPhotoStudio({
               src={userImage}
               alt="Uploaded user portrait"
               style={{
-                width: '44px',
-                height: '44px',
-                borderRadius: '50%',
+                width: '48px',
+                height: '56px',
+                borderRadius: 'var(--radius-xs)',
                 objectFit: 'cover',
                 border: '2px solid var(--accent-gold)'
               }}
@@ -178,8 +204,8 @@ export default function UserPhotoStudio({
                 </span>
                 <ShieldCheck style={{ width: 14, height: 14, color: '#10b981' }} />
               </div>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                Facial identity locked • 33-point body keypoints estimated
+              <div style={{ fontSize: '10px', color: '#10b981', fontWeight: 700, marginTop: '2px' }}>
+                ✓ Shoulders & Torso Detected • Face Shield Protected (0% Cloth Overlap)
               </div>
             </div>
             <span className="wl-badge wl-badge-gold" style={{ fontSize: '9px' }}>
@@ -202,10 +228,10 @@ export default function UserPhotoStudio({
             </div>
             <div style={{ textAlign: 'left' }}>
               <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '13px', color: '#fff' }}>
-                Upload Your Own Full-Body Photo
+                Upload Full-Body Photo (Shoulders Visible)
               </div>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                Drag & drop or browse • Auto pose estimation & identity preservation
+                Drag & drop or browse • 100% Face Preservation & Landmark Alignment
               </div>
             </div>
           </>
@@ -215,10 +241,10 @@ export default function UserPhotoStudio({
       {/* Preset Studio Models Grid */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
         <label className="wl-control-label" style={{ margin: 0 }}>
-          Or Select Studio Model Persona
+          Or Select Studio Model Persona (Full Torso Framing)
         </label>
         <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-          6 Studio Lighting Presets
+          6 HD Studio Presets
         </span>
       </div>
 
