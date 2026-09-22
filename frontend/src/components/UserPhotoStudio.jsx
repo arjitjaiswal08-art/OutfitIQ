@@ -8,7 +8,7 @@ export const PRESET_MODELS = [
     gender: "female",
     body_type: "regular",
     desc: "Studio Neutral Stance",
-    image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80"
+    image: "/models/elena.jpg"
   },
   {
     id: "model_female_athletic",
@@ -16,7 +16,7 @@ export const PRESET_MODELS = [
     gender: "female",
     body_type: "athletic",
     desc: "Athletic Build",
-    image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80"
+    image: "/models/maya.jpg"
   },
   {
     id: "model_female_plus",
@@ -24,7 +24,7 @@ export const PRESET_MODELS = [
     gender: "female",
     body_type: "plus",
     desc: "Curvy Silhouette",
-    image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=600&q=80"
+    image: "/models/sophia.jpg"
   },
   {
     id: "model_male_athletic",
@@ -32,7 +32,7 @@ export const PRESET_MODELS = [
     gender: "male",
     body_type: "athletic",
     desc: "Athletic Build",
-    image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=600&q=80"
+    image: "/models/marcus.jpg"
   },
   {
     id: "model_male_slim",
@@ -40,7 +40,7 @@ export const PRESET_MODELS = [
     gender: "male",
     body_type: "slim",
     desc: "Slim Runway",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=600&q=80"
+    image: "/models/julian.jpg"
   },
   {
     id: "model_male_regular",
@@ -48,7 +48,7 @@ export const PRESET_MODELS = [
     gender: "male",
     body_type: "regular",
     desc: "Standard Posture",
-    image: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?auto=format&fit=crop&w=600&q=80"
+    image: "/models/david.jpg"
   }
 ];
 

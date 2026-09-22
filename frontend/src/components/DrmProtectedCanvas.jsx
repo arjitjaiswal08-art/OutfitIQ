@@ -198,20 +198,8 @@ export default function DrmProtectedCanvas({
     ctx.fillText("↔", splitX, handleY);
     ctx.restore();
 
-    // 4. Subtle Luxury DRM Corner Seal
+    // 4. Clean Bottom Status Ticker
     const sessionId = drmToken?.session_id || "WL-SEC-8821";
-    ctx.save();
-    ctx.fillStyle = "rgba(7, 9, 14, 0.75)";
-    ctx.fillRect(width - 240, height - 60, 224, 22);
-    ctx.strokeStyle = "rgba(223, 178, 107, 0.4)";
-    ctx.lineWidth = 1;
-    ctx.strokeRect(width - 240, height - 60, 224, 22);
-    ctx.fillStyle = "#dfb26b";
-    ctx.font = "600 10px Plus Jakarta Sans, sans-serif";
-    ctx.fillText(`🔒 WEARLYTICS DRM • ${sessionId}`, width - 232, height - 45);
-    ctx.restore();
-
-    // 5. Bottom Status Ticker
     ctx.save();
     ctx.fillStyle = "rgba(7, 9, 14, 0.92)";
     ctx.fillRect(0, height - 32, width, 32);
