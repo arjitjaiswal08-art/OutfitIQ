@@ -317,11 +317,11 @@ export default function DrmProtectedCanvas({
       {/* Viewport Top Toolbar */}
       <div className="wl-viewport-toolbar">
         <div className="wl-toolbar-group">
-          <span className="wl-badge wl-badge-drm" style={{ fontSize: '11px' }}>
-            <Lock style={{ width: 12, height: 12 }} /> HARDWARE DRM ACTIVE
+          <span className="wl-badge wl-badge-drm" style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <Lock style={{ width: 12, height: 12 }} /> 100% Privacy Protected
           </span>
-          <span className="wl-badge wl-badge-gold" style={{ fontSize: '11px' }}>
-            <Shield style={{ width: 12, height: 12 }} /> NEURAL COUTURE ENGINE
+          <span className="wl-badge wl-badge-gold" style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <Shield style={{ width: 12, height: 12 }} /> AI Fit Active
           </span>
         </div>
 
@@ -332,15 +332,16 @@ export default function DrmProtectedCanvas({
             title="Inspect Fabric Texture (2.6x Optical Zoom)"
           >
             <ZoomIn style={{ width: 14, height: 14 }} />
-            {zoomActive ? "Close Loupe" : "Inspection Loupe"}
+            {zoomActive ? "Close Loupe" : "Zoom Fabric"}
           </button>
 
           <button
             onClick={() => setSliderPos(50)}
             className="wl-tool-btn"
-            title="Reset Split (50/50)"
+            title="Reset to 50/50 Split"
           >
             <RefreshCw style={{ width: 13, height: 13 }} />
+            50/50
           </button>
         </div>
       </div>
@@ -437,10 +438,10 @@ export default function DrmProtectedCanvas({
               marginBottom: '16px'
             }} />
             <h4 style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '17px', color: 'var(--accent-gold-light)' }}>
-              Neural Try-On Synthesizer
+              Trying On Outfit...
             </h4>
             <p style={{ fontSize: '12px', color: 'var(--text-secondary)', maxWidth: '300px', marginTop: '6px' }}>
-              Fitting garment mesh, contouring shoulder seams, and calculating photometric drape...
+              Aligning shoulder landmarks, preserving facial identity, and contouring fabric drape...
             </p>
           </div>
         )}
@@ -470,12 +471,43 @@ export default function DrmProtectedCanvas({
         )}
       </div>
 
-      {/* Comparison Helper Bar */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: 'var(--text-muted)', marginTop: '12px' }}>
-        <span>← Drag center divider to compare Original Model vs AI Fit →</span>
-        <span style={{ color: 'var(--accent-gold-light)', fontWeight: 700 }}>
-          Split: {Math.round(sliderPos)}% / {100 - Math.round(sliderPos)}%
-        </span>
+      {/* 1-Click Comparison Action Bar (User-Friendly & Easy to Use) */}
+      <div className="wl-quick-compare-bar">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={() => setSliderPos(100)}
+            className={`wl-compare-pill ${sliderPos >= 98 ? 'active' : ''}`}
+            title="Show Original Model Photo Only"
+          >
+            👈 Original Only
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSliderPos(50)}
+            className={`wl-compare-pill ${Math.abs(sliderPos - 50) <= 2 ? 'active' : ''}`}
+            title="Split 50% Original / 50% AI Try-On"
+          >
+            ↔ 50/50 Split
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSliderPos(0)}
+            className={`wl-compare-pill ${sliderPos <= 2 ? 'active' : ''}`}
+            title="Show Full AI Try-On Result"
+          >
+            👉 AI Try-On Only
+          </button>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: 'var(--text-muted)' }}>
+          <span>💡 <strong style={{ color: 'var(--text-secondary)' }}>Tip:</strong> Drag center divider ↔ or click pills</span>
+          <span className="wl-badge wl-badge-gold" style={{ fontSize: '10px', padding: '1px 7px' }}>
+            {sliderPos >= 98 ? "100% Original" : sliderPos <= 2 ? "100% Try-On" : `${Math.round(100 - sliderPos)}% Try-On`}
+          </span>
+        </div>
       </div>
     </div>
   );

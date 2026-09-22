@@ -114,141 +114,190 @@ export default function UserPhotoStudio({
     }
   };
 
+  const [activeTab, setActiveTab] = useState(userImage ? 'upload' : 'presets');
+
   return (
     <div className="wl-panel" style={{ padding: '22px', marginBottom: 0 }}>
       {/* Studio Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-        <div>
-          <span className="wl-badge wl-badge-cyan" style={{ marginBottom: '6px' }}>
-            <User style={{ width: 13, height: 13 }} /> USER PERSONA STUDIO
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span className="wl-step-pill">
+            STEP 1
           </span>
-          <h3 className="wl-section-title" style={{ fontSize: '18px' }}>
-            Model Persona & Morphology
-          </h3>
+          <div>
+            <h3 className="wl-section-title" style={{ fontSize: '17px', margin: 0 }}>
+              Choose Your Model or Photo
+            </h3>
+            <p style={{ fontSize: '11px', color: 'var(--text-muted)', margin: '2px 0 0 0' }}>
+              Your face and body shape are preserved with 100% accuracy
+            </p>
+          </div>
         </div>
 
         {userImage && (
           <button
-            onClick={() => onUserImageChange(null)}
+            onClick={() => {
+              onUserImageChange(null);
+              setActiveTab('presets');
+            }}
             className="wl-tool-btn"
             style={{ fontSize: '11px', padding: '4px 10px', color: 'var(--accent-gold-light)', borderColor: 'var(--border-gold)' }}
           >
-            <RefreshCw style={{ width: 12, height: 12 }} /> Reset to Studio Model
+            <RefreshCw style={{ width: 12, height: 12 }} /> Use Studio Model
           </button>
         )}
       </div>
 
-      {/* Required Upload Guidance Alert */}
-      <div style={{
-        background: 'rgba(223, 178, 107, 0.08)',
-        border: '1px solid rgba(223, 178, 107, 0.3)',
-        borderRadius: 'var(--radius-sm)',
-        padding: '10px 14px',
-        marginBottom: '12px',
-        display: 'flex',
-        alignItems: 'flex-start',
-        gap: '10px'
-      }}>
-        <Info style={{ width: 16, height: 16, color: 'var(--accent-gold)', marginTop: '2px', flexShrink: 0 }} />
-        <div>
-          <div style={{ fontSize: '11px', fontWeight: 800, color: 'var(--accent-gold-light)' }}>
-            AI Landmark Requirement: Full-Body or Torso with Visible Shoulders
-          </div>
-          <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>
-            For accurate 33-point pose estimation and cloth warping, ensure your shoulders and upper chest are clearly visible. Avoid face-only close-up selfies.
-          </div>
-        </div>
+      {/* Model Choice Tabs: Studio Models vs Upload My Photo */}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', background: 'rgba(6, 9, 15, 0.6)', padding: '4px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
+        <button
+          type="button"
+          onClick={() => setActiveTab('presets')}
+          style={{
+            flex: 1,
+            background: activeTab === 'presets' ? 'var(--accent-gold)' : 'transparent',
+            color: activeTab === 'presets' ? '#07090e' : 'var(--text-secondary)',
+            fontWeight: 800,
+            fontSize: '12px',
+            padding: '7px 12px',
+            border: 'none',
+            borderRadius: 'var(--radius-xs)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            transition: 'var(--transition-smooth)'
+          }}
+        >
+          <User style={{ width: 13, height: 13 }} />
+          Studio Models (6 Presets)
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveTab('upload')}
+          style={{
+            flex: 1,
+            background: activeTab === 'upload' ? 'var(--accent-gold)' : 'transparent',
+            color: activeTab === 'upload' ? '#07090e' : 'var(--text-secondary)',
+            fontWeight: 800,
+            fontSize: '12px',
+            padding: '7px 12px',
+            border: 'none',
+            borderRadius: 'var(--radius-xs)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            transition: 'var(--transition-smooth)'
+          }}
+        >
+          <Upload style={{ width: 13, height: 13 }} />
+          {userImage ? "Custom Photo Active ✓" : "Upload My Photo"}
+        </button>
       </div>
 
-      {/* Upload Custom User Photo Box */}
-      <div
-        onClick={() => fileInputRef.current?.click()}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        className="wl-upload-box"
-        style={{
-          borderColor: isDragging ? 'var(--accent-gold)' : userImage ? 'var(--border-gold)' : 'var(--border-subtle)',
-          background: isDragging ? 'rgba(223, 178, 107, 0.12)' : userImage ? 'rgba(223, 178, 107, 0.08)' : 'rgba(10, 14, 24, 0.65)',
-          padding: '14px 18px',
-          cursor: 'pointer',
-          transition: 'var(--transition-smooth)',
-          marginBottom: '14px'
-        }}
-      >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          onChange={handleFileUpload}
-          style={{ display: 'none' }}
-        />
-
-        {userImage ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', width: '100%' }}>
-            <img
-              src={userImage}
-              alt="Uploaded user portrait"
-              style={{
-                width: '48px',
-                height: '56px',
-                borderRadius: 'var(--radius-xs)',
-                objectFit: 'cover',
-                border: '2px solid var(--accent-gold)'
-              }}
+      {activeTab === 'upload' ? (
+        <>
+          {/* Upload Custom User Photo Box */}
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className="wl-upload-box"
+            style={{
+              borderColor: isDragging ? 'var(--accent-gold)' : userImage ? 'var(--border-gold)' : 'var(--border-subtle)',
+              background: isDragging ? 'rgba(223, 178, 107, 0.12)' : userImage ? 'rgba(223, 178, 107, 0.08)' : 'rgba(10, 14, 24, 0.65)',
+              padding: '16px',
+              cursor: 'pointer',
+              transition: 'var(--transition-smooth)',
+              marginBottom: '12px'
+            }}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              style={{ display: 'none' }}
             />
-            <div style={{ textAlign: 'left', flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '13px', color: '#fff' }}>
-                  Custom User Photo Active
-                </span>
-                <ShieldCheck style={{ width: 14, height: 14, color: '#10b981' }} />
+
+            {userImage ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', width: '100%' }}>
+                <img
+                  src={userImage}
+                  alt="Uploaded user portrait"
+                  style={{
+                    width: '54px',
+                    height: '64px',
+                    borderRadius: 'var(--radius-xs)',
+                    objectFit: 'cover',
+                    border: '2px solid var(--accent-gold)'
+                  }}
+                />
+                <div style={{ textAlign: 'left', flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '13px', color: '#fff' }}>
+                      Your Photo Is Active
+                    </span>
+                    <ShieldCheck style={{ width: 14, height: 14, color: '#10b981' }} />
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#10b981', fontWeight: 600, marginTop: '2px' }}>
+                    ✓ Face preserved • Natural shoulder drape aligned
+                  </div>
+                  <div style={{ fontSize: '10px', color: 'var(--accent-gold-light)', marginTop: '2px' }}>
+                    Click to replace with another picture
+                  </div>
+                </div>
               </div>
-              <div style={{ fontSize: '10px', color: '#10b981', fontWeight: 700, marginTop: '2px' }}>
-                ✓ Shoulders & Torso Detected • Face Shield Protected (0% Cloth Overlap)
-              </div>
-            </div>
-            <span className="wl-badge wl-badge-gold" style={{ fontSize: '9px' }}>
-              CUSTOM
-            </span>
+            ) : (
+              <>
+                <div style={{
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '50%',
+                  background: 'rgba(223, 178, 107, 0.15)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--accent-gold)'
+                }}>
+                  <Upload style={{ width: 18, height: 18 }} />
+                </div>
+                <div style={{ textAlign: 'left' }}>
+                  <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '13px', color: '#fff' }}>
+                    Click or Drag to Upload Your Photo
+                  </div>
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                    Works best with full-body or waist-up photos with shoulders visible
+                  </div>
+                </div>
+              </>
+            )}
           </div>
-        ) : (
-          <>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              borderRadius: '50%',
-              background: 'rgba(223, 178, 107, 0.15)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'var(--accent-gold)'
-            }}>
-              <Upload style={{ width: 18, height: 18 }} />
-            </div>
-            <div style={{ textAlign: 'left' }}>
-              <div style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: '13px', color: '#fff' }}>
-                Upload Full-Body Photo (Shoulders Visible)
-              </div>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-                Drag & drop or browse • 100% Face Preservation & Landmark Alignment
-              </div>
-            </div>
-          </>
-        )}
-      </div>
 
-      {/* Preset Studio Models Grid */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-        <label className="wl-control-label" style={{ margin: 0 }}>
-          Or Select Studio Model Persona (Full Torso Framing)
-        </label>
-        <span style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
-          6 HD Studio Presets
-        </span>
-      </div>
-
-      <div className="wl-model-presets-grid" style={{ marginBottom: '18px' }}>
+          <div style={{
+            background: 'rgba(223, 178, 107, 0.06)',
+            border: '1px solid rgba(223, 178, 107, 0.2)',
+            borderRadius: 'var(--radius-sm)',
+            padding: '8px 12px',
+            marginBottom: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            fontSize: '11px',
+            color: 'var(--accent-gold-light)'
+          }}>
+            <Sparkles style={{ width: 14, height: 14, flexShrink: 0 }} />
+            <span>Privacy Note: Your photos are processed privately and never shared.</span>
+          </div>
+        </>
+      ) : (
+        /* Preset Studio Models Grid */
+        <div className="wl-model-presets-grid" style={{ marginBottom: '16px' }}>
         {PRESET_MODELS.map((preset) => {
           const isSelected = selectedPresetId === preset.id && !userImage;
           return (
@@ -286,6 +335,7 @@ export default function UserPhotoStudio({
           );
         })}
       </div>
+      )}
 
       {/* Attribute Controls */}
       <div className="wl-control-row">

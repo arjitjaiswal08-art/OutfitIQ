@@ -1688,3 +1688,311 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(223, 178, 107, 0.6);
 }
+
+/* ============================================================
+   USER-FRIENDLY & EASY-TO-USE ATELIER EXTENSIONS
+   ============================================================ */
+
+/* Step Pills */
+.wl-step-pill {
+  background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-gold-dark) 100%);
+  color: #07090e;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.6px;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  box-shadow: 0 0 10px var(--accent-gold-glow);
+}
+
+/* 3-Step Guided Action Flow Bar */
+.wl-guide-flow-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 768px) {
+  .wl-guide-flow-bar {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+.wl-guide-step-card {
+  background: rgba(14, 18, 28, 0.7);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: var(--transition-smooth);
+}
+
+.wl-guide-step-card:hover {
+  border-color: rgba(223, 178, 107, 0.35);
+  background: rgba(20, 26, 40, 0.85);
+}
+
+.wl-guide-step-card.active {
+  border-color: var(--accent-gold);
+  background: rgba(223, 178, 107, 0.08);
+  box-shadow: 0 4px 18px rgba(223, 178, 107, 0.15);
+}
+
+.wl-guide-step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(223, 178, 107, 0.15);
+  color: var(--accent-gold-light);
+  border: 1px solid var(--border-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.wl-guide-step-card.active .wl-guide-step-num {
+  background: var(--accent-gold);
+  color: #07090e;
+}
+
+/* Quick Compare Pill Bar below Canvas */
+.wl-quick-compare-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(8, 11, 18, 0.85);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  margin-top: 12px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.wl-compare-pill {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.wl-compare-pill:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.wl-compare-pill.active {
+  background: var(--accent-gold);
+  color: #07090e;
+  border-color: var(--accent-gold);
+  font-weight: 800;
+  box-shadow: 0 0 12px var(--accent-gold-glow);
+}
+
+/* Trending Outfits 1-Click Strip */
+.wl-trending-strip {
+  background: rgba(12, 16, 26, 0.7);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  margin-bottom: 22px;
+}
+
+.wl-trending-scroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-top: 10px;
+}
+
+.wl-trending-card {
+  flex: 0 0 auto;
+  width: 170px;
+  background: rgba(7, 9, 15, 0.85);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  display: flex;
+  flex-direction: column;
+}
+
+.wl-trending-card:hover {
+  border-color: var(--accent-gold);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6);
+}
+
+.wl-trending-card.active {
+  border-color: var(--accent-gold);
+  background: rgba(223, 178, 107, 0.1);
+}
+
+.wl-trending-thumb {
+  width: 100%;
+  height: 105px;
+  object-fit: cover;
+  border-radius: var(--radius-xs);
+  background: #000;
+}
+
+/* Embedded In-Room Wardrobe & Garment Rack */
+.wl-inroom-wardrobe {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  margin-top: 24px;
+  box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.6);
+  transition: var(--transition-smooth);
+}
+
+.wl-inroom-wardrobe:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.wl-wardrobe-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.wl-brand-pills-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+}
+
+.wl-brand-pill-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: var(--transition-smooth);
+}
+
+.wl-brand-pill-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.wl-brand-pill-btn.active {
+  background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-gold-dark) 100%);
+  color: #07090e;
+  border-color: var(--accent-gold);
+  font-weight: 800;
+  box-shadow: 0 0 14px var(--accent-gold-glow);
+}
+
+.wl-inroom-garments-scroll {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+  max-height: 440px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+@media (max-width: 640px) {
+  .wl-inroom-garments-scroll {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}
+
+.wl-inroom-item-card {
+  background: rgba(10, 14, 24, 0.75);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  display: flex;
+  flex-direction: column;
+}
+
+.wl-inroom-item-card:hover {
+  border-color: rgba(223, 178, 107, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.7);
+}
+
+.wl-inroom-item-card.active {
+  border-color: var(--accent-gold);
+  background: rgba(223, 178, 107, 0.08);
+  box-shadow: 0 0 18px rgba(223, 178, 107, 0.25);
+}
+
+.wl-inroom-thumb-wrap {
+  position: relative;
+  width: 100%;
+  height: 140px;
+  background: #090c14;
+  overflow: hidden;
+}
+
+.wl-inroom-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.wl-inroom-item-card:hover .wl-inroom-thumb {
+  transform: scale(1.05);
+}
+
+.wl-inroom-price-badge {
+  position: absolute;
+  bottom: 6px;
+  left: 6px;
+  background: rgba(7, 9, 14, 0.85);
+  backdrop-filter: blur(8px);
+  padding: 2px 7px;
+  border-radius: var(--radius-xs);
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--accent-gold-light);
+  border: 1px solid rgba(223, 178, 107, 0.3);
+}
+
+.wl-url-box-inroom {
+  background: rgba(10, 14, 24, 0.8);
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
