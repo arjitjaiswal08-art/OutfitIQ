@@ -1,5 +1,5 @@
 """
-Wearlytics - AI Fashion Virtual Try-On System Backend API
+Wearlytics - AI Fashion Virtual Try-On System Backend API (Vercel Serverless Ready)
 """
 
 from fastapi import FastAPI, HTTPException, Request
@@ -24,7 +24,6 @@ app = FastAPI(
     description="Advanced Virtual Try-On System supporting 29 top fashion brands with DRM protection"
 )
 
-# Enable CORS for frontend Vite dev server and production
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -32,6 +31,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.middleware("http")
+async def vercel_routing_middleware(request: Request, call_next):
+    route = request.query_params.get("__route__")
+    if route is not None:
+        clean = route.strip("/")
+        request.scope["path"] = f"/api/{clean}" if clean else "/api"
+    response = await call_next(request)
+    return response
 
 class ExtractProductRequest(BaseModel):
     url: str = Field(..., description="Brand product URL from Zara, Nike, Uniqlo, etc.")
@@ -50,6 +58,18 @@ class TryOnRequest(BaseModel):
     angle: str = Field("front", description="front, side, or mirror")
     drm_session_id: Optional[str] = Field(None, description="Client session ID for DRM token verification")
 
+@app.get("/")
+@app.get("/api")
+@app.get("/api/")
+def root_info():
+    return {
+        "service": "Wearlytics AI Virtual Try-On API",
+        "status": "online",
+        "version": "1.0.0",
+        "brands_supported": 29
+    }
+
+@app.get("/health")
 @app.get("/api/health")
 def health_check():
     return {
@@ -59,15 +79,16 @@ def health_check():
         "drm_protection_enabled": True
     }
 
+@app.get("/brands")
 @app.get("/api/brands")
 def list_brands():
-    """Returns all 29 supported global fashion brands and their curated garments."""
     brands = get_all_brands()
     return {
         "total_brands": len(brands),
         "brands": brands
     }
 
+@app.get("/brands/{brand_id}")
 @app.get("/api/brands/{brand_id}")
 def get_brand(brand_id: str):
     brand = get_brand_by_id(brand_id)
@@ -75,9 +96,9 @@ def get_brand(brand_id: str):
         raise HTTPException(status_code=404, detail="Brand not found")
     return brand
 
+@app.post("/extract-product")
 @app.post("/api/extract-product")
 async def extract_product(req: ExtractProductRequest):
-    """Scrapes product image and metadata from brand URLs."""
     if not req.url or not req.url.strip():
         raise HTTPException(status_code=400, detail="Product URL is required")
     try:
@@ -89,30 +110,22 @@ async def extract_product(req: ExtractProductRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to extract product: {str(e)}")
 
+@app.get("/drm-token")
+@app.post("/drm-token")
+@app.get("/api/drm-token")
 @app.post("/api/drm-token")
 def create_drm_token():
-    """Generates an ephemeral cryptographic DRM session token for secure canvas rendering."""
     token = generate_session_drm_token()
     return token
 
+@app.post("/try-on")
 @app.post("/api/try-on")
 def run_virtual_try_on(req: TryOnRequest):
-    """
-    Executes the neural virtual try-on pipeline:
-    - Landmark extraction
-    - Body segmentation
-    - Cloth warping
-    - Photometric harmony
-    - Multi-angle generation
-    - DRM security watermarking
-    """
-    # Resolve product
     product = req.product_data
     if not product and req.product_item_id:
         product = find_item_by_id(req.product_item_id)
     
     if not product:
-        # Fallback to brand default item
         brand = get_brand_by_id(req.selected_brand)
         if brand and brand.get("items"):
             product = {**brand["items"][0], "brand_name": brand["name"], "brand_id": brand["id"]}
@@ -140,6 +153,10 @@ def run_virtual_try_on(req: TryOnRequest):
     )
     return result
 
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+@app.api_route("/{rest_of_path:path}", methods=["GET", "POST", "PUT", "DELETE"])
+async def catch_all_debugger(request: Request, rest_of_path: str):
+    return {
+        "debug_path": request.url.path,
+        "rest_of_path": rest_of_path,
+        "method": request.method
+    }
