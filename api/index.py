@@ -152,11 +152,3 @@ def run_virtual_try_on(req: TryOnRequest):
         drm_token=drm_token
     )
     return result
-
-@app.api_route("/{rest_of_path:path}", methods=["GET", "POST", "PUT", "DELETE"])
-async def catch_all_debugger(request: Request, rest_of_path: str):
-    return {
-        "debug_path": request.url.path,
-        "rest_of_path": rest_of_path,
-        "method": request.method
-    }
