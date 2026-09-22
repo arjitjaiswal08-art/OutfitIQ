@@ -129,16 +129,6 @@ export default function DrmProtectedCanvas({
       ctx.rect(0, 0, splitX, height);
       ctx.clip();
       ctx.drawImage(activeBefore, 0, 0, width, height);
-
-      // Label
-      ctx.fillStyle = "rgba(10, 14, 22, 0.85)";
-      ctx.fillRect(16, 16, 136, 30);
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
-      ctx.lineWidth = 1;
-      ctx.strokeRect(16, 16, 136, 30);
-      ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 12px Outfit, sans-serif";
-      ctx.fillText("ORIGINAL PHOTO", 24, 36);
       ctx.restore();
     } else {
       // Dark neutral placeholder
@@ -159,13 +149,6 @@ export default function DrmProtectedCanvas({
       ctx.rect(splitX, 0, width - splitX, height);
       ctx.clip();
       ctx.drawImage(rightImg, 0, 0, width, height);
-
-      // Label
-      ctx.fillStyle = "rgba(223, 178, 107, 0.95)";
-      ctx.fillRect(width - 156, 16, 140, 30);
-      ctx.fillStyle = "#07090e";
-      ctx.font = "bold 12px Outfit, sans-serif";
-      ctx.fillText("AI TRY-ON ACTIVE", width - 144, 36);
       ctx.restore();
     }
 
@@ -196,6 +179,34 @@ export default function DrmProtectedCanvas({
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText("↔", splitX, handleY);
+    ctx.restore();
+
+    // 4. Badges (Drawn outside clips so they are NEVER cut off)
+    ctx.save();
+    if (splitX > 90) {
+      // Left Pill: ORIGINAL PHOTO
+      ctx.fillStyle = "rgba(10, 14, 22, 0.88)";
+      ctx.fillRect(16, 16, 130, 28);
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(16, 16, 130, 28);
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 11px Outfit, sans-serif";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "alphabetic";
+      ctx.fillText("ORIGINAL PHOTO", 24, 34);
+    }
+
+    if (width - splitX > 90) {
+      // Right Pill: AI TRY-ON ACTIVE
+      ctx.fillStyle = "rgba(223, 178, 107, 0.95)";
+      ctx.fillRect(width - 146, 16, 130, 28);
+      ctx.fillStyle = "#07090e";
+      ctx.font = "bold 11px Outfit, sans-serif";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "alphabetic";
+      ctx.fillText("AI TRY-ON ACTIVE", width - 138, 34);
+    }
     ctx.restore();
 
     // 4. Clean Bottom Status Ticker

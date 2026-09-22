@@ -295,11 +295,11 @@ class VirtualTryOnEngine:
         width, height = base_img.size
 
         # Morphological width scaling
-        body_scales = {"slim": 0.85, "regular": 0.90, "athletic": 0.96, "plus": 1.05}
+        body_scales = {"slim": 0.88, "regular": 0.94, "athletic": 0.98, "plus": 1.08}
         fit_scales = {"tight": 0.92, "regular": 1.0, "oversized": 1.12}
         size_scales = {"S": 0.95, "M": 1.0, "L": 1.05, "XL": 1.10}
 
-        total_scale = body_scales.get(body_type, 0.90) * fit_scales.get(fit_style, 1.0) * size_scales.get(size, 1.0)
+        total_scale = body_scales.get(body_type, 0.94) * fit_scales.get(fit_style, 1.0) * size_scales.get(size, 1.0)
 
         # Perspective offset for side angle
         dx = int(width * 0.04) if angle == "side" else 0
@@ -321,9 +321,9 @@ class VirtualTryOnEngine:
             collar_mask = Image.new("L", (torso_w, torso_h), 255)
             cdraw = ImageDraw.Draw(collar_mask)
             cx = torso_w / 2.0
-            cw = torso_w * 0.17
-            cdepth = torso_h * 0.12
-            cdraw.ellipse([(cx - cw, -cdepth), (cx + cw, cdepth)], fill=0)
+            cw = torso_w * 0.15
+            cdepth = torso_h * 0.09
+            cdraw.ellipse([(cx - cw, -cdepth * 0.8), (cx + cw, cdepth)], fill=0)
             collar_mask = collar_mask.filter(ImageFilter.GaussianBlur(radius=3))
 
             cur_alpha = np.array(garment_scaled.split()[-1])
@@ -334,14 +334,14 @@ class VirtualTryOnEngine:
             # 4. Photometric relighting on the garment
             garment_scaled = self._relight_layer(garment_scaled, lighting)
 
-            # 5. Position on model's shoulders
+            # 5. Position on model's shoulders & chest (below chin/neck)
             pos_x = (width - torso_w) // 2 + dx
-            pos_y = int(height * 0.31)
+            pos_y = int(height * 0.44)
 
             # 6. Ambient drop shadow under collar onto model
             shadow_layer = Image.new("RGBA", (width, height), (0, 0, 0, 0))
             sdraw = ImageDraw.Draw(shadow_layer)
-            sdraw.ellipse([(width / 2.0 + dx - 45, pos_y + 12), (width / 2.0 + dx + 45, pos_y + 40)], fill=(0, 0, 0, 85))
+            sdraw.ellipse([(width / 2.0 + dx - 45, pos_y + 8), (width / 2.0 + dx + 45, pos_y + 30)], fill=(0, 0, 0, 75))
             shadow_layer = shadow_layer.filter(ImageFilter.GaussianBlur(radius=5))
 
             composite.alpha_composite(shadow_layer)
@@ -349,7 +349,7 @@ class VirtualTryOnEngine:
 
         else:
             # High-end synthetic texture fallback
-            composite = self._render_synthetic_garment(composite, product, total_scale, dx, int(height * 0.31), lighting)
+            composite = self._render_synthetic_garment(composite, product, total_scale, dx, int(height * 0.44), lighting)
 
         if angle == "mirror":
             composite = ImageOps.mirror(composite)
