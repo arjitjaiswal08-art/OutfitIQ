@@ -30,7 +30,8 @@ import {
   Smartphone,
   QrCode,
   Heart,
-  Ruler
+  Ruler,
+  Shirt
 } from 'lucide-react';
 import DrmProtectedCanvas from './components/DrmProtectedCanvas';
 import BrandSelector from './components/BrandSelector';
