@@ -83,15 +83,40 @@ export default function EcommerceTryOnFlow({
         return true;
       });
 
+  // Format currency properly handling strings or numbers without NaN
+  const formatPrice = (val, curr = 'INR') => {
+    if (!val) return '₹3,990';
+    if (typeof val === 'string') {
+      if (val.includes('₹') || val.includes('$') || val.includes('€') || val.includes('£')) {
+        return val;
+      }
+      const num = parseFloat(val.replace(/[^0-9.]/g, ''));
+      if (!isNaN(num) && num > 0) {
+        return curr === 'INR' ? `₹${num.toLocaleString('en-IN')}` : `$${num}`;
+      }
+      return val;
+    }
+    if (typeof val === 'number') {
+      return curr === 'INR' ? `₹${val.toLocaleString('en-IN')}` : `$${val}`;
+    }
+    return '₹3,990';
+  };
+
   const activeProduct = selectedProduct || brandProducts[0] || {
     id: 'sample_01',
     title: 'Textured Relaxed Overshirt',
-    price: 3990,
+    name: 'Textured Relaxed Overshirt',
+    price: '₹3,990',
     currency: 'INR',
     image: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=600&q=80',
+    image_url: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=600&q=80',
     color: 'Sand Beige',
     category: 'Overshirt'
   };
+
+  const productImg = activeProduct.image || activeProduct.image_url || 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=600&q=80';
+  const productTitle = activeProduct.title || activeProduct.name || 'Textured Relaxed Overshirt';
+  const productPrice = formatPrice(activeProduct.price, activeProduct.currency);
 
   // Preset models for Fitting Room
   const studioModels = [
@@ -141,13 +166,6 @@ export default function EcommerceTryOnFlow({
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  };
-
-  // Format currency
-  const formatPrice = (val, curr = 'INR') => {
-    if (!val) return '$89.99';
-    if (curr === 'INR') return `₹${Number(val).toLocaleString('en-IN')}`;
-    return `$${val}`;
   };
 
   return (
@@ -235,8 +253,8 @@ export default function EcommerceTryOnFlow({
             <div className="wl-card-product-box">
               <div className="wl-card-prod-img-wrap">
                 <img
-                  src={activeProduct.image}
-                  alt={activeProduct.title}
+                  src={productImg}
+                  alt={productTitle}
                   className="wl-card-prod-img"
                   onError={(e) => {
                     e.currentTarget.src = 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=400&q=80';
@@ -245,10 +263,10 @@ export default function EcommerceTryOnFlow({
                 <span className="wl-card-brand-pill">{selectedBrand?.name || 'Zara'}</span>
               </div>
               <div className="wl-card-prod-info">
-                <h4 className="wl-card-prod-title">{activeProduct.title}</h4>
+                <h4 className="wl-card-prod-title">{productTitle}</h4>
                 <div className="wl-card-prod-meta">
-                  <span className="wl-card-price">{formatPrice(activeProduct.price, activeProduct.currency)}</span>
-                  <span className="wl-card-badge">{activeProduct.color || 'Standard'}</span>
+                  <span className="wl-card-price">{productPrice}</span>
+                  <span className="wl-card-badge">{activeProduct.color || activeProduct.category || 'Standard'}</span>
                 </div>
               </div>
             </div>
@@ -615,7 +633,7 @@ export default function EcommerceTryOnFlow({
             <div className="wl-checkout-fields-box">
               <div className="wl-checkout-field">
                 <span className="wl-co-label">ITEM:</span>
-                <span className="wl-co-val" title={activeProduct.title}>{activeProduct.title}</span>
+                <span className="wl-co-val" title={productTitle}>{productTitle}</span>
               </div>
               <div className="wl-checkout-field">
                 <span className="wl-co-label">SIZE:</span>
@@ -623,7 +641,7 @@ export default function EcommerceTryOnFlow({
               </div>
               <div className="wl-checkout-field">
                 <span className="wl-co-label">PRICE:</span>
-                <span className="wl-co-val wl-co-price">{formatPrice(activeProduct.price, activeProduct.currency)}</span>
+                <span className="wl-co-val wl-co-price">{productPrice}</span>
               </div>
               <div className="wl-checkout-field">
                 <span className="wl-co-label">SHARE:</span>
