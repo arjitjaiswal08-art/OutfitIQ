@@ -41,6 +41,7 @@ import AiEngineModal from './components/AiEngineModal';
 import AuthModal from './components/AuthModal';
 import InRoomWardrobe from './components/InRoomWardrobe';
 import ReimagineModal from './components/ReimagineModal';
+import EcommerceTryOnFlow from './components/EcommerceTryOnFlow';
 
 export default function App() {
   const [brands, setBrands] = useState([]);
@@ -50,8 +51,8 @@ export default function App() {
   const [selectedPresetId, setSelectedPresetId] = useState('model_female_regular');
   const [currentModelImage, setCurrentModelImage] = useState(PRESET_MODELS[0].image);
 
-  // Active Dashboard Workspace View: 'dressing_room' | 'brands' | 'products' | 'analytics' | 'all'
-  const [activeDashboardView, setActiveDashboardView] = useState('dressing_room');
+  // Active Dashboard Workspace View: 'ecom_flow' | 'dressing_room' | 'brands' | 'products' | 'analytics' | 'all'
+  const [activeDashboardView, setActiveDashboardView] = useState('ecom_flow');
 
   // Dressing Room Configuration
   const [gender, setGender] = useState('female');
@@ -702,6 +703,14 @@ export default function App() {
             ============================================================ */}
         <div className="wl-view-switcher">
           <button
+            onClick={() => setActiveDashboardView('ecom_flow')}
+            className={`wl-view-tab ${activeDashboardView === 'ecom_flow' ? 'active' : ''}`}
+          >
+            <Sparkles style={{ width: 15, height: 15, color: 'var(--accent-cyan)' }} />
+            AI Try-On Flow (E-Commerce)
+          </button>
+
+          <button
             onClick={() => setActiveDashboardView('dressing_room')}
             className={`wl-view-tab ${activeDashboardView === 'dressing_room' ? 'active' : ''}`}
           >
@@ -825,6 +834,41 @@ export default function App() {
                 </button>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* ============================================================
+            AI GARMENT TRY-ON FLOW FOR E-COMMERCE (5-STAGE FLAGSHIP FLOW)
+            (Visible when 'ecom_flow' or 'all')
+            ============================================================ */}
+        {(activeDashboardView === 'ecom_flow' || activeDashboardView === 'all') && (
+          <div id="wl-ecom-flow-section" style={{ marginBottom: activeDashboardView === 'all' ? '36px' : '0' }}>
+            <EcommerceTryOnFlow
+              brands={brands}
+              selectedBrand={selectedBrand}
+              onSelectBrand={handleSelectBrand}
+              selectedProduct={selectedProduct}
+              onSelectProduct={handleSelectProduct}
+              currentModelImage={currentModelImage}
+              userImage={userImage}
+              selectedPresetId={selectedPresetId}
+              onSelectPreset={handleSelectPreset}
+              onOpenPhotoStudio={() => setActiveDashboardView('dressing_room')}
+              size={size}
+              onChangeSize={setSize}
+              fitStyle={fitStyle}
+              onChangeFitStyle={setFitStyle}
+              lighting={lighting}
+              onChangeLighting={handleLightingChange}
+              angle={angle}
+              onChangeAngle={setAngle}
+              tryonResult={tryonResult}
+              activeImage={activeImage}
+              isLoading={isLoading}
+              onRunTryOn={runVirtualTryOn}
+              quota={quota}
+              onOpenMonetization={() => setIsMonetizationOpen(true)}
+            />
           </div>
         )}
 
