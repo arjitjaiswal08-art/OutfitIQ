@@ -26,7 +26,11 @@ import {
   TrendingUp,
   Key,
   CreditCard,
-  HelpCircle
+  HelpCircle,
+  Smartphone,
+  QrCode,
+  Heart,
+  Ruler
 } from 'lucide-react';
 import DrmProtectedCanvas from './components/DrmProtectedCanvas';
 import BrandSelector from './components/BrandSelector';
@@ -42,6 +46,9 @@ import AuthModal from './components/AuthModal';
 import InRoomWardrobe from './components/InRoomWardrobe';
 import ReimagineModal from './components/ReimagineModal';
 import EcommerceTryOnFlow from './components/EcommerceTryOnFlow';
+import MobileAppExperience from './components/MobileAppExperience';
+import TryListCartModal from './components/TryListCartModal';
+import UserProfileModal from './components/UserProfileModal';
 
 export default function App() {
   const [brands, setBrands] = useState([]);
@@ -90,6 +97,84 @@ export default function App() {
     remaining: 10
   });
   const [tryonHistory, setTryonHistory] = useState([]);
+
+  // Mobile & In-Store E-Commerce Journey State (Images 1, 2, 5)
+  const [tryList, setTryList] = useState([
+    {
+      id: 'try-item-1',
+      brand: 'Zara',
+      title: 'Textured Relaxed Overshirt',
+      name: 'Textured Relaxed Overshirt',
+      color: 'Sand Beige',
+      size: 'Size M',
+      price: '₹3,990',
+      image: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=500&q=80'
+    },
+    {
+      id: 'try-item-2',
+      brand: 'Nike',
+      title: 'Tech Fleece Windrunner Hoodie',
+      name: 'Tech Fleece Windrunner Hoodie',
+      color: 'Heather Grey',
+      size: 'Size L',
+      price: '₹7,995',
+      image: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=500&q=80'
+    }
+  ]);
+
+  const [cartItems, setCartItems] = useState([
+    {
+      id: 'cart-item-1',
+      brand: 'Zara',
+      title: 'Textured Relaxed Overshirt',
+      name: 'Textured Relaxed Overshirt',
+      color: 'Sand Beige',
+      size: 'Size M',
+      price: '₹3,990',
+      image: 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=500&q=80'
+    }
+  ]);
+
+  const [isJourneyModalOpen, setIsJourneyModalOpen] = useState(false);
+  const [journeyModalTab, setJourneyModalTab] = useState('cart'); // 'cart' | 'try_list' | 'qr_scan'
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+
+  const handleAddToCart = (product) => {
+    if (!product) return;
+    setCartItems(prev => [
+      ...prev,
+      {
+        id: `cart-${Date.now()}-${Math.random()}`,
+        brand: product.brand || selectedBrand?.name || 'Zara',
+        title: product.title || product.name || 'Designer Apparel',
+        color: product.color || 'Standard',
+        size: `Size ${size}`,
+        price: product.price || '₹3,990',
+        image: product.image || product.image_url || product.img
+      }
+    ]);
+  };
+
+  const handleAddToTryList = (product) => {
+    if (!product) return;
+    setTryList(prev => [
+      ...prev,
+      {
+        id: `try-${Date.now()}-${Math.random()}`,
+        brand: product.brand || selectedBrand?.name || 'Zara',
+        title: product.title || product.name || 'Designer Apparel',
+        color: product.color || 'Standard',
+        size: `Size ${size}`,
+        price: product.price || '₹3,990',
+        image: product.image || product.image_url || product.img
+      }
+    ]);
+  };
+
+  const handleOpenJourneyModal = (tabName) => {
+    setJourneyModalTab(tabName);
+    setIsJourneyModalOpen(true);
+  };
 
   // 1. Fetch Brands Catalog & Quota on Mount
   useEffect(() => {
@@ -520,6 +605,47 @@ export default function App() {
               {userPlan === 'pro' ? "PRO ATELIER (UNLIMITED)" : `UPGRADE ₹299 (${quota.remaining}/10 LEFT)`}
             </button>
 
+            {/* E-Commerce Customer Journey Quick-Actions (Images 1, 2, 5) */}
+            <button
+              onClick={() => handleOpenJourneyModal('qr_scan')}
+              className="wl-tool-btn"
+              style={{ fontSize: '11px', padding: '6px 10px', background: 'rgba(0, 242, 254, 0.08)', borderColor: 'rgba(0, 242, 254, 0.3)', color: 'var(--accent-cyan)' }}
+              title="Scan in-store garment QR / barcode"
+            >
+              <QrCode style={{ width: 13, height: 13 }} />
+              QR Scan
+            </button>
+
+            <button
+              onClick={() => handleOpenJourneyModal('try_list')}
+              className="wl-tool-btn"
+              style={{ fontSize: '11px', padding: '6px 10px', color: 'var(--accent-gold-light)' }}
+              title="View saved fitting room Try List"
+            >
+              <Heart style={{ width: 13, height: 13, color: '#f43f5e' }} />
+              Try List ({tryList.length})
+            </button>
+
+            <button
+              onClick={() => handleOpenJourneyModal('cart')}
+              className="wl-tool-btn"
+              style={{ fontSize: '11px', padding: '6px 12px', background: 'rgba(16, 185, 129, 0.12)', borderColor: 'var(--accent-emerald)', color: '#fff' }}
+              title="View shopping bag & checkout"
+            >
+              <ShoppingBag style={{ width: 13, height: 13, color: 'var(--accent-emerald)' }} />
+              Cart ({cartItems.length})
+            </button>
+
+            <button
+              onClick={() => setIsProfileModalOpen(true)}
+              className="wl-tool-btn"
+              style={{ fontSize: '11px', padding: '6px 10px' }}
+              title="Configure 3D body measurements & profile"
+            >
+              <Ruler style={{ width: 13, height: 13, color: 'var(--accent-gold)' }} />
+              Fit Profile
+            </button>
+
             {/* 2. AI Engine Architecture Button */}
             <button
               onClick={() => setIsAiEngineOpen(true)}
@@ -711,6 +837,14 @@ export default function App() {
           </button>
 
           <button
+            onClick={() => setActiveDashboardView('mobile_app')}
+            className={`wl-view-tab ${activeDashboardView === 'mobile_app' ? 'active' : ''}`}
+          >
+            <Smartphone style={{ width: 15, height: 15, color: 'var(--accent-gold)' }} />
+            Mobile App View (3-Step)
+          </button>
+
+          <button
             onClick={() => setActiveDashboardView('dressing_room')}
             className={`wl-view-tab ${activeDashboardView === 'dressing_room' ? 'active' : ''}`}
           >
@@ -749,6 +883,57 @@ export default function App() {
             <Layers style={{ width: 15, height: 15 }} />
             Full Showcase View
           </button>
+        </div>
+
+        {/* ============================================================
+            3-STEP AI TRY-ON PROCESS RIBBON (Matching Blueprint Image 4)
+            ============================================================ */}
+        <div className="wl-process-ribbon">
+          <div className="wl-process-title-row">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Sparkles style={{ width: 14, height: 14, color: 'var(--accent-gold)' }} />
+              <span className="wl-process-title">AI Try-On Process</span>
+            </div>
+            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+              Universal FastAPI & Gemini Neural Draping Pipeline
+            </span>
+          </div>
+
+          <div className="wl-process-steps-row">
+            <div className="wl-process-step-node">
+              <div className="wl-process-circle-icon">
+                <User style={{ width: 22, height: 22 }} />
+              </div>
+              <div className="wl-process-step-info">
+                <span className="wl-process-step-name">1. You</span>
+                <span className="wl-process-step-sub">3D Body Scan & Pose</span>
+              </div>
+            </div>
+
+            <div className="wl-process-arrow">➔</div>
+
+            <div className="wl-process-step-node">
+              <div className="wl-process-circle-icon" style={{ borderColor: 'var(--accent-gold)', color: 'var(--accent-gold)' }}>
+                <Shirt style={{ width: 22, height: 22 }} />
+              </div>
+              <div className="wl-process-step-info">
+                <span className="wl-process-step-name">2. Garment</span>
+                <span className="wl-process-step-sub">3D Scan & Mesh Extraction</span>
+              </div>
+            </div>
+
+            <div className="wl-process-arrow">➔</div>
+
+            <div className="wl-process-step-node">
+              <div className="wl-process-circle-icon" style={{ borderColor: 'var(--accent-emerald)', color: 'var(--accent-emerald)' }}>
+                <Sparkles style={{ width: 22, height: 22 }} />
+              </div>
+              <div className="wl-process-step-info">
+                <span className="wl-process-step-name">3. Synthesis</span>
+                <span className="wl-process-step-sub">Virtual Fit & Realistic Render</span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Quick Floating Brand Strip (shown in dressing room view or full showcase) */}
@@ -868,6 +1053,35 @@ export default function App() {
               onRunTryOn={runVirtualTryOn}
               quota={quota}
               onOpenMonetization={() => setIsMonetizationOpen(true)}
+            />
+          </div>
+        )}
+
+        {/* ============================================================
+            MOBILE APP EXPERIENCE SIMULATOR (Matching Blueprint Image 2)
+            (Visible when 'mobile_app' or 'all')
+            ============================================================ */}
+        {(activeDashboardView === 'mobile_app' || activeDashboardView === 'all') && (
+          <div id="wl-mobile-app-section" style={{ marginBottom: activeDashboardView === 'all' ? '36px' : '0' }}>
+            <MobileAppExperience
+              brands={brands}
+              selectedBrand={selectedBrand}
+              selectedProduct={selectedProduct}
+              onSelectProduct={handleSelectProduct}
+              currentModelImage={currentModelImage}
+              userImage={userImage}
+              onUploadUserPhoto={(img) => {
+                setUserImage(img);
+                runVirtualTryOn({ userImage: img });
+              }}
+              onSelectPreset={handleSelectPreset}
+              selectedPresetId={selectedPresetId}
+              tryonResult={tryonResult}
+              activeImage={activeImage}
+              isLoading={isLoading}
+              onRunTryOn={runVirtualTryOn}
+              onAddToCart={handleAddToCart}
+              onAddToTryList={handleAddToTryList}
             />
           </div>
         )}
@@ -1285,6 +1499,42 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* TryList & Cart E-Commerce Modal (Images 1 & 5) */}
+      <TryListCartModal
+        isOpen={isJourneyModalOpen}
+        onClose={() => setIsJourneyModalOpen(false)}
+        initialTab={journeyModalTab}
+        tryList={tryList}
+        cartItems={cartItems}
+        onRemoveFromCart={(idx) => {
+          setCartItems(prev => prev.filter((_, i) => i !== idx));
+        }}
+        onRemoveFromTryList={(idOrIdx) => {
+          setTryList(prev => prev.filter((item, i) => (item.id || i) !== idOrIdx));
+        }}
+        onAddToCartFromTryList={(item) => {
+          handleAddToCart(item);
+        }}
+        onAddAllToCart={() => {
+          tryList.forEach(item => handleAddToCart(item));
+        }}
+        onTryItemFromList={(item) => {
+          handleSelectProduct(item);
+        }}
+        onAddScannedItem={(item) => {
+          handleAddToTryList(item);
+        }}
+      />
+
+      {/* User Profile & Measurements Modal (Images 1 & 5) */}
+      <UserProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        onSaveProfile={(prof) => {
+          setFitStyle(prof.fitPreference || fitStyle);
+        }}
+      />
 
       {/* Footer */}
       <footer style={{
