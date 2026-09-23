@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Cpu,
   X,
@@ -12,53 +12,66 @@ import {
   Activity,
   ArrowRight,
   ShieldCheck,
-  CheckCircle2
+  CheckCircle2,
+  Key,
+  ExternalLink,
+  Code2
 } from 'lucide-react';
 
 export default function AiEngineModal({ isOpen, onClose }) {
   if (!isOpen) return null;
+
+  const [activeEngine, setActiveEngine] = useState('local');
+  const [replicateKey, setReplicateKey] = useState(() => localStorage.getItem('wearlytics_replicate_token') || '');
+  const [keySaved, setKeySaved] = useState(false);
+
+  const handleSaveToken = () => {
+    localStorage.setItem('wearlytics_replicate_token', replicateKey.trim());
+    setKeySaved(true);
+    setTimeout(() => setKeySaved(false), 2500);
+  };
 
   const pipelineStages = [
     {
       step: 1,
       name: "Human Pose & Keypoint Estimation",
       model: "MediaPipe Holistic / OpenPose (33 Keypoints)",
-      purpose: "Detects shoulders, elbows, wrists, collarbone coordinates, and torso tilt.",
+      purpose: "Detects shoulders, elbows, collarbone notch, and torso tilt for sleeve alignment.",
       latency: "45ms"
     },
     {
       step: 2,
-      name: "Human Body Segmentation",
-      model: "U2Net / Detectron2 DensePose",
-      purpose: "Isolates limbs and torso while strictly locking facial identity and original hair.",
+      name: "Identity Shield & Human Segmentation",
+      model: "DensePose + Face Shield Extraction",
+      purpose: "Isolates limbs and torso while strictly locking facial identity and hair above chin.",
       latency: "78ms"
     },
     {
       step: 3,
-      name: "Garment Boundary & Chroma-Matting",
+      name: "Chroma Extraction & Hanger Removal",
       model: "BiSeNet V2 + High-Res Alpha Matting",
-      purpose: "Separates garment fabric from background and strips out white polygon edges.",
+      purpose: "Strips background and automatically eliminates coat hanger hooks and tags.",
       latency: "62ms"
     },
     {
       step: 4,
       name: "Deformable Cloth Mesh Warping",
-      model: "HR-VITON / IDM-VTON (Thin-Plate Splines)",
-      purpose: "Warps fabric to body contours based on size (S-XXL) and drape tension.",
-      latency: "190ms"
+      model: "Affine Mesh Warper (18° Arm Hang Trajectory)",
+      purpose: "Rotates flat-lay sleeves downward to trace arms; fits shoulders to body contours.",
+      latency: "95ms"
     },
     {
       step: 5,
       name: "Crease Inpainting & Diffusion Realism",
-      model: "Stable Diffusion XL + ControlNet (Canny / OpenPose)",
-      purpose: "Synthesizes realistic shadows, light bounce, and textile draping folds.",
-      latency: "420ms"
+      model: "Stable Diffusion XL / IDM-VTON + Ambient Occlusion",
+      purpose: "Synthesizes realistic shadows under collar and natural fabric drape tension.",
+      latency: "320ms"
     },
     {
       step: 6,
       name: "Hardware DRM Buffer Rendering",
       model: "Encrypted HTML5 Canvas 2D Stream",
-      purpose: "Draws directly to client buffer with dynamic watermarks and devtools traps.",
+      purpose: "Renders direct to client buffer with dynamic watermarks and devtools traps.",
       latency: "12ms"
     }
   ];
@@ -80,7 +93,7 @@ export default function AiEngineModal({ isOpen, onClose }) {
         background: 'linear-gradient(135deg, rgba(16, 22, 36, 0.98) 0%, rgba(8, 12, 20, 0.99) 100%)',
         border: '1px solid var(--border-gold)',
         borderRadius: 'var(--radius-lg)',
-        width: '820px',
+        width: '840px',
         maxWidth: '100%',
         maxHeight: '92vh',
         overflowY: 'auto',
@@ -117,19 +130,125 @@ export default function AiEngineModal({ isOpen, onClose }) {
               <Cpu style={{ width: 13, height: 13 }} /> AI ENGINE & CLOUD ARCHITECTURE
             </span>
             <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-              Neural Draping Pipeline • Enterprise Cloud Topology • DRM Security
+              Pose → Segmentation → Mesh Warping → Diffusion
             </span>
           </div>
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '24px', fontWeight: 800, color: '#fff' }}>
-            The Wearlytics Neural Try-On Architecture
+            The Wearlytics Neural Try-On Pipeline
           </h2>
         </div>
 
-        {/* 1. 6-Stage Neural Pipeline Diagram */}
+        {/* Engine Provider Selection Card */}
+        <div style={{
+          background: 'rgba(10, 14, 24, 0.85)',
+          border: '1px solid var(--border-gold)',
+          borderRadius: 'var(--radius-md)',
+          padding: '16px',
+          marginBottom: '20px'
+        }}>
+          <div style={{ fontSize: '13px', fontWeight: 800, color: '#fff', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Zap style={{ width: 15, height: 15, color: 'var(--accent-gold)' }} />
+            Inference Engine Runtime
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px' }}>
+            {/* Local Neural Mesh Warper */}
+            <div
+              onClick={() => setActiveEngine('local')}
+              style={{
+                border: activeEngine === 'local' ? '2px solid var(--accent-gold)' : '1px solid var(--border-subtle)',
+                background: activeEngine === 'local' ? 'rgba(223, 178, 107, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '14px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 800, color: '#fff' }}>
+                  ⚡ Neural Mesh Warper + Torso Synthesizer
+                </span>
+                <span className="wl-badge wl-badge-gold" style={{ fontSize: '10px' }}>Active</span>
+              </div>
+              <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: '4px 0 8px 0', lineHeight: 1.4 }}>
+                Instant edge synthesis (~220ms). 100% Face identity lock, hanger removal, and 18° sleeve drape warping. Zero API cost.
+              </p>
+              <div style={{ fontSize: '10px', color: '#10b981', fontWeight: 700 }}>
+                ✓ Serverless-ready • Zero latency • Unlimited try-ons
+              </div>
+            </div>
+
+            {/* Cloud GPU Diffusion Model (Replicate IDM-VTON) */}
+            <div
+              onClick={() => setActiveEngine('replicate')}
+              style={{
+                border: activeEngine === 'replicate' ? '2px solid #00f2fe' : '1px solid var(--border-subtle)',
+                background: activeEngine === 'replicate' ? 'rgba(0, 242, 254, 0.08)' : 'rgba(255, 255, 255, 0.02)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '14px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 800, color: '#fff' }}>
+                  ☁️ Pretrained VTON API (IDM-VTON / HR-VITON)
+                </span>
+                <span className="wl-badge wl-badge-cyan" style={{ fontSize: '10px' }}>Cloud GPU</span>
+              </div>
+              <p style={{ fontSize: '11px', color: 'var(--text-secondary)', margin: '4px 0 8px 0', lineHeight: 1.4 }}>
+                Runs high-resolution latent diffusion model on NVIDIA A100 GPU cluster via Replicate or HuggingFace API.
+              </p>
+              <div style={{ fontSize: '10px', color: 'var(--accent-gold-light)', fontWeight: 700 }}>
+                Supports IDM-VTON & Ladi-VTON pretrained checkpoints
+              </div>
+            </div>
+          </div>
+
+          {/* Replicate API Token Input */}
+          {activeEngine === 'replicate' && (
+            <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px solid var(--border-subtle)' }}>
+              <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--accent-cyan)', display: 'block', marginBottom: '6px' }}>
+                Enter Replicate API Token (r8_...)
+              </label>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input
+                  type="password"
+                  value={replicateKey}
+                  onChange={(e) => setReplicateKey(e.target.value)}
+                  placeholder="r8_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                  style={{
+                    flex: 1,
+                    background: 'rgba(7, 9, 14, 0.9)',
+                    border: '1px solid var(--border-subtle)',
+                    borderRadius: 'var(--radius-xs)',
+                    padding: '8px 12px',
+                    color: '#fff',
+                    fontSize: '12px',
+                    fontFamily: 'monospace'
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={handleSaveToken}
+                  className="wl-action-btn primary"
+                  style={{ padding: '8px 16px', fontSize: '12px', whiteSpace: 'nowrap' }}
+                >
+                  {keySaved ? "Saved ✓" : "Save Key"}
+                </button>
+              </div>
+              <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                Get an API key at <a href="https://replicate.com" target="_blank" rel="noreferrer" style={{ color: '#00f2fe' }}>replicate.com</a>. If no key is set, the system automatically runs the local neural mesh warper.
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 6-Stage Neural Pipeline Diagram */}
         <div style={{ marginBottom: '24px' }}>
           <div style={{ fontSize: '13px', fontWeight: 800, color: '#fff', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <Layers style={{ width: 15, height: 15, color: 'var(--accent-gold)' }} />
-            6-Stage Neural Inference Pipeline (~807ms Total Latency)
+            The 6-Stage Production Pipeline
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '10px' }}>
@@ -155,7 +274,7 @@ export default function AiEngineModal({ isOpen, onClose }) {
                   {stage.name}
                 </div>
                 <div style={{ fontSize: '10px', fontWeight: 600, color: 'var(--accent-gold-light)', marginTop: '2px' }}>
-                  Model: {stage.model}
+                  {stage.model}
                 </div>
                 <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '4px', lineHeight: 1.4 }}>
                   {stage.purpose}
@@ -165,47 +284,30 @@ export default function AiEngineModal({ isOpen, onClose }) {
           </div>
         </div>
 
-        {/* 2. Cloud Infrastructure Setup */}
+        {/* System Prompt & Mathematical Rules */}
         <div style={{
-          background: 'rgba(8, 12, 20, 0.85)',
-          border: '1px solid var(--border-subtle)',
+          background: 'rgba(7, 9, 14, 0.95)',
+          border: '1px solid rgba(0, 242, 254, 0.3)',
           borderRadius: 'var(--radius-md)',
-          padding: '20px',
+          padding: '16px',
           marginBottom: '20px'
         }}>
-          <div style={{ fontSize: '13px', fontWeight: 800, color: '#fff', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Server style={{ width: 15, height: 15, color: 'var(--accent-cyan)' }} />
-            Enterprise Cloud Infrastructure Stack
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 800, color: '#00f2fe', marginBottom: '8px' }}>
+            <Code2 style={{ width: 14, height: 14 }} />
+            Virtual Try-On System Prompt & Rules
           </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '12px' }}>
-            <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '12px', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>API Gateway</div>
-              <div style={{ fontSize: '13px', fontWeight: 800, color: '#fff', marginTop: '2px' }}>FastAPI + Vercel Edge</div>
-              <div style={{ fontSize: '10px', color: 'var(--accent-gold-light)', marginTop: '2px' }}>Rate limiting + JWT Auth</div>
-            </div>
-
-            <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '12px', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>GPU Inference Cluster</div>
-              <div style={{ fontSize: '13px', fontWeight: 800, color: '#fff', marginTop: '2px' }}>NVIDIA A100 80GB</div>
-              <div style={{ fontSize: '10px', color: '#10b981', marginTop: '2px' }}>RunPod / AWS EC2 g5.xlarge</div>
-            </div>
-
-            <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '12px', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Relational Database</div>
-              <div style={{ fontSize: '13px', fontWeight: 800, color: '#fff', marginTop: '2px' }}>PostgreSQL</div>
-              <div style={{ fontSize: '10px', color: 'var(--accent-cyan)', marginTop: '2px' }}>Neon / Supabase Serverless</div>
-            </div>
-
-            <div style={{ background: 'rgba(255, 255, 255, 0.03)', padding: '12px', borderRadius: 'var(--radius-xs)', border: '1px solid var(--border-subtle)' }}>
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Memory Cache</div>
-              <div style={{ fontSize: '13px', fontWeight: 800, color: '#fff', marginTop: '2px' }}>Redis 7.2</div>
-              <div style={{ fontSize: '10px', color: 'var(--accent-gold-light)', marginTop: '2px' }}>Upstash Sub-ms Quota</div>
-            </div>
+          <div style={{ fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.6, fontFamily: 'monospace', background: 'rgba(0, 0, 0, 0.4)', padding: '10px', borderRadius: 'var(--radius-xs)' }}>
+            1. Detect full human body structure using pose estimation.<br/>
+            2. Identify shoulders, chest, and arms precisely.<br/>
+            3. Remove existing clothing from torso region only.<br/>
+            4. Extract garment cleanly (eliminate hanger hooks & tags).<br/>
+            5. Warp sleeves along 18° natural arm drape angles.<br/>
+            6. Blend with realistic lighting & ambient occlusion drop shadows.<br/>
+            7. STRICT: Face and hair remain 100% mathematically untouched.
           </div>
         </div>
 
-        {/* 3. Image Protection System Details */}
+        {/* Multi-Layered Image Protection System */}
         <div style={{
           background: 'linear-gradient(135deg, rgba(223, 178, 107, 0.08) 0%, rgba(10, 14, 24, 0.9) 100%)',
           border: '1px solid var(--border-gold)',
@@ -215,13 +317,13 @@ export default function AiEngineModal({ isOpen, onClose }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
             <Lock style={{ width: 15, height: 15, color: 'var(--accent-gold)' }} />
             <span style={{ fontSize: '13px', fontWeight: 800, color: '#fff' }}>
-              Multi-Layered Image Protection System
+              Multi-Layered DRM Protection System
             </span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '8px', fontSize: '11px', color: 'var(--text-secondary)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <CheckCircle2 style={{ width: 13, height: 13, color: '#10b981' }} />
-              <span>HTML5 Canvas protected buffer (No static img URLs)</span>
+              <span>HTML5 Canvas protected buffer (No raw file URLs)</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
               <CheckCircle2 style={{ width: 13, height: 13, color: '#10b981' }} />
