@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { Shield, Lock, ZoomIn, RefreshCw, AlertTriangle, Eye } from 'lucide-react';
+import { Shield, Lock, ZoomIn, RefreshCw, AlertTriangle, Eye, Sparkles, Wand2 } from 'lucide-react';
 
 export default function DrmProtectedCanvas({
   primaryImage,
@@ -11,7 +11,9 @@ export default function DrmProtectedCanvas({
   onResetZoom,
   selectedAngle = "front",
   selectedFit = "regular",
-  selectedSize = "M"
+  selectedSize = "M",
+  onOpenReimagine,
+  reimagineStyle = "standard"
 }) {
   const containerRef = useRef(null);
   const canvasRef = useRef(null);
@@ -317,6 +319,21 @@ export default function DrmProtectedCanvas({
       {/* Viewport Top Toolbar */}
       <div className="wl-viewport-toolbar">
         <div className="wl-toolbar-group">
+          {/* 🍌 Create Images Button (Matches User Screenshot) */}
+          <button
+            type="button"
+            onClick={onOpenReimagine}
+            className="wl-create-images-pill-btn"
+            title="Create images: Reimagine, illustrate, edit"
+          >
+            <span className="wl-create-images-banana">🍌</span>
+            <div className="wl-create-images-copy">
+              <span className="wl-create-images-title">Create images</span>
+              <span className="wl-create-images-sub">Reimagine, illustrate, edit</span>
+            </div>
+            <Sparkles style={{ width: 14, height: 14, color: '#f59e0b', marginLeft: '2px' }} />
+          </button>
+
           <span className="wl-badge wl-badge-drm" style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '5px' }}>
             <Lock style={{ width: 12, height: 12 }} /> 100% Privacy Protected
           </span>

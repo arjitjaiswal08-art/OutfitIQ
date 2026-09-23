@@ -90,6 +90,12 @@ class TryOnRequest(BaseModel):
     lighting: str = Field("studio", description="studio, golden_hour, or urban_night")
     angle: str = Field("front", description="front, side, or mirror")
     drm_session_id: Optional[str] = Field(None, description="Client session ID for DRM token verification")
+    reimagine_style: Optional[str] = Field("standard", description="standard, editorial_studio, golden_hour, cyber_runway, fashion_illustration, vintage_film, luxury_noir")
+
+class ReimagineRequest(BaseModel):
+    image: str = Field(..., description="Base64 encoded primary image to reimagine")
+    style: str = Field("editorial_studio", description="editorial_studio | golden_hour | cyber_runway | fashion_illustration | vintage_film | luxury_noir")
+    prompt: Optional[str] = Field(None, description="Optional creative prompt or aesthetic direction")
 
 class LoginRequest(BaseModel):
     email: str = Field("curator@wearlytics.com", description="User email")
@@ -217,7 +223,8 @@ def run_virtual_try_on(req: TryOnRequest):
         size=req.size,
         lighting=req.lighting,
         angle=req.angle,
-        drm_token=drm_token
+        drm_token=drm_token,
+        reimagine_style=req.reimagine_style or "standard"
     )
 
     # Attach User Quota & Plan details to response
@@ -246,6 +253,24 @@ def run_virtual_try_on(req: TryOnRequest):
             USER_STATE["history"].pop()
 
     return result
+
+# --- 🍌 Create Images: Reimagine, Illustrate, Edit ---
+@app.post("/reimagine")
+@app.post("/api/reimagine")
+def reimagine_image(req: ReimagineRequest):
+    """
+    Dedicated endpoint for:
+    🍌 Create images - Reimagine, illustrate, edit
+    Takes any generated or user image and applies high-end generative/artistic transformations.
+    """
+    if not req.image or not req.image.strip():
+        raise HTTPException(status_code=400, detail="Image data is required")
+    try:
+        engine = get_tryon_engine()
+        res = engine.reimagine_image(req.image, req.style, req.prompt)
+        return res
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to reimagine image: {str(e)}")
 
 # --- 🔐 Authentication Service (JWT & Role Based) ---
 @app.post("/auth/login")

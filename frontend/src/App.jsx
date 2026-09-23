@@ -40,6 +40,7 @@ import MonetizationModal from './components/MonetizationModal';
 import AiEngineModal from './components/AiEngineModal';
 import AuthModal from './components/AuthModal';
 import InRoomWardrobe from './components/InRoomWardrobe';
+import ReimagineModal from './components/ReimagineModal';
 
 export default function App() {
   const [brands, setBrands] = useState([]);
@@ -75,6 +76,9 @@ export default function App() {
   const [isAiEngineOpen, setIsAiEngineOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isHowItWorksOpen, setIsHowItWorksOpen] = useState(false);
+  const [isReimagineOpen, setIsReimagineOpen] = useState(false);
+  const [isReimagining, setIsReimagining] = useState(false);
+  const [reimagineStyle, setReimagineStyle] = useState('editorial_studio');
 
   // User Account & Monetization Quota State
   const [userPlan, setUserPlan] = useState('free');
@@ -209,6 +213,41 @@ export default function App() {
       runVirtualTryOn();
     }
   }, [selectedProduct, runVirtualTryOn, tryonResult]);
+
+  // Reimagine Outfit Styling Routine (🍌 Create images - Reimagine, illustrate, edit)
+  const handleApplyReimagineStyle = async (chosenStyle, chosenPrompt) => {
+    setIsReimagining(true);
+    setReimagineStyle(chosenStyle);
+    try {
+      const currentImg = activeImage || tryonResult?.primary_image;
+      if (!currentImg) return;
+
+      const res = await fetch('/api/reimagine', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          image: currentImg,
+          style: chosenStyle,
+          prompt: chosenPrompt
+        })
+      });
+
+      if (!res.ok) {
+        throw new Error(`Reimagine returned status ${res.status}`);
+      }
+
+      const data = await res.json();
+      if (data.image) {
+        setActiveImage(data.image);
+        setTryonResult(prev => prev ? { ...prev, primary_image: data.image } : prev);
+      }
+    } catch (err) {
+      console.error("Reimagine fallback to virtual try-on:", err);
+      await runVirtualTryOn({ reimagineStyle: chosenStyle });
+    } finally {
+      setIsReimagining(false);
+    }
+  };
 
   // Popular Trending Styles for 1-Click Quick Try-On
   const trendingLooks = [
@@ -848,13 +887,15 @@ export default function App() {
                   primaryImage={activeImage || tryonResult?.primary_image || currentModelImage}
                   beforeImage={tryonResult?.before_image || currentModelImage}
                   drmToken={tryonResult?.meta?.drm_token}
-                  isLoading={isLoading}
+                  isLoading={isLoading || isReimagining}
                   zoomActive={zoomActive}
                   setZoomActive={setZoomActive}
                   onResetZoom={() => setZoomActive(false)}
                   selectedAngle={angle}
                   selectedFit={fitStyle}
                   selectedSize={size}
+                  onOpenReimagine={() => setIsReimagineOpen(true)}
+                  reimagineStyle={reimagineStyle}
                 />
               </div>
 
@@ -1041,6 +1082,15 @@ export default function App() {
         currentRole={userRole}
         onSelectRole={(r) => setUserRole(r)}
         history={tryonHistory}
+      />
+
+      {/* 🍌 Create Images (Reimagine, Illustrate, Edit) Modal */}
+      <ReimagineModal
+        isOpen={isReimagineOpen}
+        onClose={() => setIsReimagineOpen(false)}
+        currentImage={activeImage || tryonResult?.primary_image}
+        onApplyStyle={handleApplyReimagineStyle}
+        isLoading={isReimagining}
       />
 
       {/* How It Works Quick Tour Modal */}
