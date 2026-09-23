@@ -57,6 +57,29 @@ PRESET_MODEL_RATIOS = {
     "model_male_regular": {"chin_y": 0.28, "neck_y": 0.30, "collarbone_y": 0.33, "shoulder_w": 0.84},
 }
 
+def normalize_to_torso_frame(img: Image.Image, target_w: int = 680, target_h: int = 850) -> Image.Image:
+    """
+    FIX 3: CROP TO TORSO (Never crop to legs/shoes)
+    Guarantees full head, shoulders, and chest are retained with exact 4:5 aspect ratio.
+    Anchors cropping towards the upper third rather than center or bottom.
+    """
+    w, h = img.size
+    target_aspect = target_w / target_h
+    current_aspect = w / h
+
+    if current_aspect > target_aspect:
+        # Image is wider than 4:5 -> crop sides evenly, keep full vertical height
+        new_w = int(h * target_aspect)
+        left = max(0, (w - new_w) // 2)
+        cropped = img.crop((left, 0, left + new_w, h))
+    else:
+        # Image is taller than 4:5 (e.g. 9:16 or full-body photo)
+        # CRITICAL: Anchor to TOP 0 to preserve head, shoulders, and chest!
+        new_h = int(w / target_aspect)
+        cropped = img.crop((0, 0, w, min(h, new_h)))
+
+    return cropped.resize((target_w, target_h), Image.Resampling.LANCZOS)
+
 class VirtualTryOnEngine:
     def __init__(self):
         self.replicate_token = os.environ.get("REPLICATE_API_TOKEN", "").strip()
@@ -120,6 +143,7 @@ class VirtualTryOnEngine:
         self,
         user_image_raw: Optional[str],
         product: Dict[str, Any],
+        selected_brand: Optional[str] = "zara",
         gender: str = "female",
         body_type: str = "regular",
         pose_preference: str = "same_pose",
@@ -146,6 +170,12 @@ class VirtualTryOnEngine:
         product_img_url = product.get("image_url")
         garment_src_img = self._fetch_image(product_img_url) if product_img_url else None
 
+        print(f"[TRYON ENGINE DEBUG] === NEW TRY-ON REQUEST ===")
+        print(f"[TRYON ENGINE DEBUG] Selected Brand: {selected_brand}, Product: {product.get('name')}")
+        print(f"[TRYON ENGINE DEBUG] Person Base Size: {base_model_img.size if base_model_img else 'None'}")
+        print(f"[TRYON ENGINE DEBUG] Garment Src Size: {garment_src_img.size if garment_src_img else 'None'}")
+        print(f"[TRYON ENGINE DEBUG] Attributes: gender={gender}, body_type={body_type}, fit_style={fit_style}, size={size}, lighting={lighting}")
+
         # 3. Composite Primary Try-On following the 5 key AI steps
         primary_composite = self._composite_garment_seamlessly(
             base_img=base_model_img.copy(),
@@ -164,7 +194,8 @@ class VirtualTryOnEngine:
         if reimagine_style and reimagine_style not in ["standard", "none"]:
             primary_composite = self._apply_reimagine_effect(primary_composite, base_model_img, reimagine_style)
 
-        # 4. Generate Variations Gallery
+        # 4. Generate Variations Gallery from EXACT SAME primary composite (Fix 2 & Fix 5)
+        # Guarantees that Lighting Gallery displays the exact same torso frame and never crops to legs/shoes
         variation_configs = [
             {
                 "id": "var_studio",
@@ -197,18 +228,8 @@ class VirtualTryOnEngine:
 
         variations = []
         for cfg in variation_configs:
-            var_img = self._composite_garment_seamlessly(
-                base_img=base_model_img.copy(),
-                garment_img=garment_src_img,
-                product=product,
-                gender=gender,
-                body_type=body_type,
-                fit_style=cfg["fit_style"],
-                size=size,
-                lighting=cfg["lighting"],
-                angle=cfg["angle"],
-                preset_key=preset_key if is_preset else None
-            )
+            # FIX: Apply lighting and editorial effect directly on primary_composite so frame is 100% IDENTICAL
+            var_img = self._relight_layer(primary_composite.copy(), cfg["lighting"])
             var_img = self._apply_reimagine_effect(var_img, base_model_img, cfg["style"])
             variations.append({
                 "id": cfg["id"],
@@ -218,6 +239,9 @@ class VirtualTryOnEngine:
                 "fit_style": cfg["fit_style"],
                 "image_data": self._image_to_base64(var_img)
             })
+
+        print(f"[TRYON ENGINE DEBUG] Primary Output Size: {primary_composite.size}")
+        print(f"[TRYON ENGINE DEBUG] Generated {len(variations)} matching variations in identical frame.")
 
         return {
             "status": "success",
@@ -266,9 +290,9 @@ class VirtualTryOnEngine:
                 draw.ellipse([(width * 0.5 - r, height * 0.4 - r), (width * 0.5 + r, height * 0.4 + r)], fill=(45, 55, 75, alpha))
             return fallback
 
-        # If it's already a preset model photo, fit directly
+        # If it's already a preset model photo, fit directly to torso frame
         if not user_image_raw or user_image_raw in PRESET_MODEL_FILES:
-            return ImageOps.fit(img, (width, height), method=Image.Resampling.LANCZOS)
+            return normalize_to_torso_frame(img, width, height)
 
         # Detect whether the user uploaded a close-up selfie
         uw, uh = img.size
@@ -291,17 +315,17 @@ class VirtualTryOnEngine:
         else:
             is_close_up = (uh / max(uw, 1) < 1.15)
 
-        # If user photo already contains full shoulders and chest, use it directly!
+        # If user photo already contains full shoulders and chest, normalize to torso frame!
         if not is_close_up:
-            return ImageOps.fit(img, (width, height), method=Image.Resampling.LANCZOS)
+            return normalize_to_torso_frame(img, width, height)
 
         # 🪄 AI Torso Synthesis: Mount user's head seamlessly on full-torso studio model base
         preset_key = f"model_{gender}_{body_type}"
         model_torso_base = self._fetch_image(preset_key) or self._fetch_image("model_male_regular" if gender == "male" else "model_female_regular")
         if model_torso_base is None:
-            return ImageOps.fit(img, (width, height), method=Image.Resampling.LANCZOS)
+            return normalize_to_torso_frame(img, width, height)
 
-        model_scaled = ImageOps.fit(model_torso_base, (width, height), method=Image.Resampling.LANCZOS)
+        model_scaled = normalize_to_torso_frame(model_torso_base, width, height)
 
         if face_detected is not None:
             fx, fy, fw, fh = face_detected

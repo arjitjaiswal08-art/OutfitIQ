@@ -138,20 +138,33 @@ export default function App() {
     loadInitialData();
   }, []);
 
+  // In-Flight Request Cancellation & Pipeline Lock (Fix 4: Single Source of Truth)
+  const inFlightAbortControllerRef = useRef(null);
+
   // 2. Virtual Try-On Execution Routine
   const runVirtualTryOn = useCallback(async (overrideParams = {}) => {
-    if (!selectedBrand && !overrideParams.product) return;
-    setIsLoading(true);
-    setErrorMessage(null);
+    const effectiveProduct = overrideParams.product || selectedProduct;
+    if (!effectiveProduct) return;
 
+    const effectiveBrand = overrideParams.brand?.id || effectiveProduct.brand_id || selectedBrand?.id || 'zara';
     const effectiveModel = overrideParams.userImage !== undefined
       ? overrideParams.userImage
       : (userImage || currentModelImage);
 
+    // Cancel any previous in-flight request to eliminate race conditions (Fix 3 & 4)
+    if (inFlightAbortControllerRef.current) {
+      inFlightAbortControllerRef.current.abort();
+    }
+    const abortController = new AbortController();
+    inFlightAbortControllerRef.current = abortController;
+
+    setIsLoading(true);
+    setErrorMessage(null);
+
     const payload = {
       user_image: effectiveModel,
-      selected_brand: selectedBrand?.id || 'zara',
-      product_data: overrideParams.product || selectedProduct,
+      selected_brand: effectiveBrand,
+      product_data: effectiveProduct,
       gender: overrideParams.gender || gender,
       body_type: overrideParams.bodyType || bodyType,
       pose_preference: overrideParams.posePreference || posePreference,
@@ -165,7 +178,8 @@ export default function App() {
       const res = await fetch('/api/try-on', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload),
+        signal: abortController.signal
       });
 
       if (!res.ok) {
@@ -189,7 +203,7 @@ export default function App() {
       setActiveImage(data.primary_image);
       setActiveVariationId('primary');
 
-      // Refresh history
+      // Refresh history silently
       try {
         const hRes = await fetch('/api/user/history');
         if (hRes.ok) {
@@ -200,10 +214,17 @@ export default function App() {
         // ignore
       }
     } catch (err) {
+      if (err.name === 'AbortError') {
+        // Superseded by newer user selection - smoothly ignored
+        return;
+      }
       console.error("Try-on error:", err);
       setErrorMessage("Virtual Try-On generation encountered an issue. Re-verifying pipeline...");
     } finally {
-      setIsLoading(false);
+      if (inFlightAbortControllerRef.current === abortController) {
+        setIsLoading(false);
+        inFlightAbortControllerRef.current = null;
+      }
     }
   }, [selectedBrand, selectedProduct, userImage, currentModelImage, gender, bodyType, posePreference, fitStyle, size, lighting, angle]);
 
@@ -314,13 +335,13 @@ export default function App() {
     runVirtualTryOn({ product: targetProduct });
   };
 
-  // Handle Brand Selection
+  // Handle Brand Selection (Fix 4: Pass brand and item together to avoid stale state)
   const handleSelectBrand = (brand) => {
     setSelectedBrand(brand);
     if (brand.items?.length > 0) {
       const firstItem = brand.items[0];
       setSelectedProduct(firstItem);
-      runVirtualTryOn({ product: firstItem });
+      runVirtualTryOn({ brand, product: firstItem });
     }
   };
 
@@ -339,14 +360,33 @@ export default function App() {
       setSelectedProduct(targetItem);
       setFitStyle(vibe.fit);
       setLighting(vibe.lighting);
-      runVirtualTryOn({ product: targetItem, fitStyle: vibe.fit, lighting: vibe.lighting });
+      runVirtualTryOn({ brand: targetBrand, product: targetItem, fitStyle: vibe.fit, lighting: vibe.lighting });
     }
   };
 
-  // Handle Product Selection
+  // Handle Product Selection (Fix 4: Explicit brand resolution)
   const handleSelectProduct = (product) => {
     setSelectedProduct(product);
-    runVirtualTryOn({ product });
+    const matchedBrand = brands.find(b => b.id === product.brand_id) || selectedBrand;
+    if (matchedBrand) setSelectedBrand(matchedBrand);
+    runVirtualTryOn({ brand: matchedBrand, product });
+  };
+
+  // Handle Lighting Change (Fix 5: Never re-run full AI, switch frame instantly without broken crops)
+  const handleLightingChange = (newLighting) => {
+    setLighting(newLighting);
+    if (tryonResult?.variations?.length > 0) {
+      const matched = tryonResult.variations.find(v => v.lighting === newLighting);
+      if (matched) {
+        setActiveImage(matched.image_data);
+        setActiveVariationId(matched.id);
+        return;
+      }
+    }
+    if (newLighting === 'studio' && tryonResult?.primary_image) {
+      setActiveImage(tryonResult.primary_image);
+      setActiveVariationId('primary');
+    }
   };
 
   // Handle Live URL Extraction
@@ -950,10 +990,7 @@ export default function App() {
                       runVirtualTryOn({ size: s });
                     }}
                     lighting={lighting}
-                    onLightingChange={(l) => {
-                      setLighting(l);
-                      runVirtualTryOn({ lighting: l });
-                    }}
+                    onLightingChange={handleLightingChange}
                     angle={angle}
                     onAngleChange={(a) => {
                       setAngle(a);

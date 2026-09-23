@@ -207,6 +207,7 @@ def run_virtual_try_on(req: TryOnRequest):
     result = engine.process_tryon(
         user_image_raw=req.user_image,
         product=product,
+        selected_brand=req.selected_brand,
         gender=req.gender,
         body_type=req.body_type,
         pose_preference=req.pose_preference,
