@@ -550,124 +550,155 @@ export default function App() {
                 <h1 className="wl-title-text text-gold-gradient">
                   WEARLYTICS
                 </h1>
-                <span className="wl-badge wl-badge-cyan" style={{ fontSize: '9px', padding: '2px 8px' }}>
+                <span className="wl-badge wl-badge-cyan wl-hide-on-mobile" style={{ fontSize: '9px', padding: '2px 8px' }}>
                   AI VIRTUAL DRESSING ROOM
                 </span>
               </div>
-              <div className="wl-subtitle">
+              <div className="wl-subtitle wl-hide-on-mobile">
                 Couture Neural Visualization • 29 Global Fashion Brands
               </div>
             </div>
           </div>
 
           {/* Right Action CTAs: Monetization, AI Engine, Auth & Hamburger */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-            {/* 0. How It Works Quick Guide Button */}
-            <button
-              onClick={() => setIsHowItWorksOpen(true)}
-              className="wl-tool-btn"
-              style={{
-                fontSize: '11px',
-                padding: '6px 12px',
-                background: 'rgba(223, 178, 107, 0.12)',
-                borderColor: 'var(--accent-gold)',
-                color: 'var(--accent-gold-light)',
-                fontWeight: 700
-              }}
-              title="Learn how to use the 3-step virtual try-on dressing room"
-            >
-              <Sparkles style={{ width: 13, height: 13, color: 'var(--accent-gold)' }} />
-              How It Works
-            </button>
+          <div className="wl-header-actions-group">
+            {/* Desktop Full Action Suite (Hidden on Mobile) */}
+            <div className="wl-desktop-actions">
+              {/* 0. How It Works Quick Guide Button */}
+              <button
+                onClick={() => setIsHowItWorksOpen(true)}
+                className="wl-tool-btn"
+                style={{
+                  fontSize: '11px',
+                  padding: '6px 12px',
+                  background: 'rgba(223, 178, 107, 0.12)',
+                  borderColor: 'var(--accent-gold)',
+                  color: 'var(--accent-gold-light)',
+                  fontWeight: 700
+                }}
+                title="Learn how to use the 3-step virtual try-on dressing room"
+              >
+                <Sparkles style={{ width: 13, height: 13, color: 'var(--accent-gold)' }} />
+                How It Works
+              </button>
 
-            {/* 1. Upgrade to Pro Button / Quota Pill */}
-            <button
-              onClick={() => setIsMonetizationOpen(true)}
-              style={{
-                background: userPlan === 'pro'
-                  ? 'linear-gradient(135deg, rgba(223, 178, 107, 0.25) 0%, rgba(223, 178, 107, 0.1) 100%)'
-                  : 'linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-gold-dark) 100%)',
-                color: userPlan === 'pro' ? 'var(--accent-gold-light)' : '#07090e',
-                border: '1px solid',
-                borderColor: userPlan === 'pro' ? 'var(--accent-gold)' : 'transparent',
-                borderRadius: 'var(--radius-full)',
-                padding: '6px 14px',
-                fontSize: '11px',
-                fontWeight: 800,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                boxShadow: userPlan === 'pro' ? '0 0 14px rgba(223, 178, 107, 0.3)' : '0 2px 14px var(--accent-gold-glow)',
-                transition: 'var(--transition-smooth)'
-              }}
-            >
-              <Crown style={{ width: 13, height: 13 }} />
-              {userPlan === 'pro' ? "PRO ATELIER (UNLIMITED)" : `UPGRADE ₹299 (${quota.remaining}/10 LEFT)`}
-            </button>
+              {/* 1. Upgrade to Pro Button / Quota Pill */}
+              <button
+                onClick={() => setIsMonetizationOpen(true)}
+                style={{
+                  background: userPlan === 'pro'
+                    ? 'linear-gradient(135deg, rgba(223, 178, 107, 0.25) 0%, rgba(223, 178, 107, 0.1) 100%)'
+                    : 'linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-gold-dark) 100%)',
+                  color: userPlan === 'pro' ? 'var(--accent-gold-light)' : '#07090e',
+                  border: '1px solid',
+                  borderColor: userPlan === 'pro' ? 'var(--accent-gold)' : 'transparent',
+                  borderRadius: 'var(--radius-full)',
+                  padding: '6px 14px',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: userPlan === 'pro' ? '0 0 14px rgba(223, 178, 107, 0.3)' : '0 2px 14px var(--accent-gold-glow)',
+                  transition: 'var(--transition-smooth)'
+                }}
+              >
+                <Crown style={{ width: 13, height: 13 }} />
+                {userPlan === 'pro' ? "PRO ATELIER (UNLIMITED)" : `UPGRADE ₹299 (${quota.remaining}/10 LEFT)`}
+              </button>
 
-            {/* E-Commerce Customer Journey Quick-Actions (Images 1, 2, 5) */}
-            <button
-              onClick={() => handleOpenJourneyModal('qr_scan')}
-              className="wl-tool-btn"
-              style={{ fontSize: '11px', padding: '6px 10px', background: 'rgba(0, 242, 254, 0.08)', borderColor: 'rgba(0, 242, 254, 0.3)', color: 'var(--accent-cyan)' }}
-              title="Scan in-store garment QR / barcode"
-            >
-              <QrCode style={{ width: 13, height: 13 }} />
-              QR Scan
-            </button>
+              {/* E-Commerce Customer Journey Quick-Actions */}
+              <button
+                onClick={() => handleOpenJourneyModal('qr_scan')}
+                className="wl-tool-btn"
+                style={{ fontSize: '11px', padding: '6px 10px', background: 'rgba(0, 242, 254, 0.08)', borderColor: 'rgba(0, 242, 254, 0.3)', color: 'var(--accent-cyan)' }}
+                title="Scan in-store garment QR / barcode"
+              >
+                <QrCode style={{ width: 13, height: 13 }} />
+                QR Scan
+              </button>
 
-            <button
-              onClick={() => handleOpenJourneyModal('try_list')}
-              className="wl-tool-btn"
-              style={{ fontSize: '11px', padding: '6px 10px', color: 'var(--accent-gold-light)' }}
-              title="View saved fitting room Try List"
-            >
-              <Heart style={{ width: 13, height: 13, color: '#f43f5e' }} />
-              Try List ({tryList.length})
-            </button>
+              <button
+                onClick={() => handleOpenJourneyModal('try_list')}
+                className="wl-tool-btn"
+                style={{ fontSize: '11px', padding: '6px 10px', color: 'var(--accent-gold-light)' }}
+                title="View saved fitting room Try List"
+              >
+                <Heart style={{ width: 13, height: 13, color: '#f43f5e' }} />
+                Try List ({tryList.length})
+              </button>
 
-            <button
-              onClick={() => handleOpenJourneyModal('cart')}
-              className="wl-tool-btn"
-              style={{ fontSize: '11px', padding: '6px 12px', background: 'rgba(16, 185, 129, 0.12)', borderColor: 'var(--accent-emerald)', color: '#fff' }}
-              title="View shopping bag & checkout"
-            >
-              <ShoppingBag style={{ width: 13, height: 13, color: 'var(--accent-emerald)' }} />
-              Cart ({cartItems.length})
-            </button>
+              <button
+                onClick={() => handleOpenJourneyModal('cart')}
+                className="wl-tool-btn"
+                style={{ fontSize: '11px', padding: '6px 12px', background: 'rgba(16, 185, 129, 0.12)', borderColor: 'var(--accent-emerald)', color: '#fff' }}
+                title="View shopping bag & checkout"
+              >
+                <ShoppingBag style={{ width: 13, height: 13, color: 'var(--accent-emerald)' }} />
+                Cart ({cartItems.length})
+              </button>
 
-            <button
-              onClick={() => setIsProfileModalOpen(true)}
-              className="wl-tool-btn"
-              style={{ fontSize: '11px', padding: '6px 10px' }}
-              title="Configure 3D body measurements & profile"
-            >
-              <Ruler style={{ width: 13, height: 13, color: 'var(--accent-gold)' }} />
-              Fit Profile
-            </button>
+              <button
+                onClick={() => setIsProfileModalOpen(true)}
+                className="wl-tool-btn"
+                style={{ fontSize: '11px', padding: '6px 10px' }}
+                title="Configure 3D body measurements & profile"
+              >
+                <Ruler style={{ width: 13, height: 13, color: 'var(--accent-gold)' }} />
+                Fit Profile
+              </button>
 
-            {/* 2. AI Engine Architecture Button */}
-            <button
-              onClick={() => setIsAiEngineOpen(true)}
-              className="wl-tool-btn"
-              style={{ fontSize: '11px', padding: '6px 12px', background: 'rgba(0, 242, 254, 0.08)', borderColor: 'rgba(0, 242, 254, 0.3)', color: 'var(--accent-cyan)' }}
-              title="View 6-stage neural pipeline & GPU cluster architecture"
-            >
-              <Cpu style={{ width: 13, height: 13 }} />
-              AI Engine
-            </button>
+              <button
+                onClick={() => setIsAiEngineOpen(true)}
+                className="wl-tool-btn"
+                style={{ fontSize: '11px', padding: '6px 12px', background: 'rgba(0, 242, 254, 0.08)', borderColor: 'rgba(0, 242, 254, 0.3)', color: 'var(--accent-cyan)' }}
+                title="View 6-stage neural pipeline & GPU cluster architecture"
+              >
+                <Cpu style={{ width: 13, height: 13 }} />
+                AI Engine
+              </button>
 
-            {/* 3. Account / Role Switcher Pill */}
-            <button
-              onClick={() => setIsAuthOpen(true)}
-              className="wl-tool-btn"
-              style={{ fontSize: '11px', padding: '6px 12px' }}
-              title="Account & Role settings"
-            >
-              <User style={{ width: 13, height: 13, color: 'var(--accent-gold)' }} />
-              <span style={{ textTransform: 'capitalize' }}>{userRole}</span>
-            </button>
+              <button
+                onClick={() => setIsAuthOpen(true)}
+                className="wl-tool-btn"
+                style={{ fontSize: '11px', padding: '6px 12px' }}
+                title="Account & Role settings"
+              >
+                <User style={{ width: 13, height: 13, color: 'var(--accent-gold)' }} />
+                <span style={{ textTransform: 'capitalize' }}>{userRole}</span>
+              </button>
+            </div>
+
+            {/* Mobile Touch Quick Actions (Visible only on phone/tablet) */}
+            <div className="wl-mobile-actions">
+              <button
+                onClick={() => setIsMonetizationOpen(true)}
+                className="wl-mob-quota-chip"
+                title="Upgrade quota"
+              >
+                <Crown style={{ width: 12, height: 12, color: 'var(--accent-gold)' }} />
+                <span>{quota.remaining}/10</span>
+              </button>
+
+              <button
+                onClick={() => handleOpenJourneyModal('try_list')}
+                className="wl-mob-icon-btn"
+                title="Try List"
+              >
+                <Heart style={{ width: 15, height: 15, color: '#f43f5e' }} />
+                {tryList.length > 0 && <span className="wl-mob-dot-badge">{tryList.length}</span>}
+              </button>
+
+              <button
+                onClick={() => handleOpenJourneyModal('cart')}
+                className="wl-mob-icon-btn"
+                title="Shopping Cart"
+              >
+                <ShoppingBag style={{ width: 15, height: 15, color: 'var(--accent-emerald)' }} />
+                {cartItems.length > 0 && <span className="wl-mob-dot-badge">{cartItems.length}</span>}
+              </button>
+            </div>
 
             {/* UPGRADED LUXURY HAMBURGER MENU & SUITE DRAWER */}
             <HamburgerMenu
@@ -782,7 +813,7 @@ export default function App() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div className="wl-cmd-actions-row">
             {/* Direct Affiliate Shop Button */}
             <a
               href={`https://www.${selectedBrand?.domain || 'zara.com'}`}
@@ -1536,6 +1567,65 @@ export default function App() {
           setFitStyle(prof.fitPreference || fitStyle);
         }}
       />
+
+      {/* Mobile Sticky Bottom Navigation Dock (Visible on Mobile < 768px) */}
+      <nav className="wl-mobile-bottom-bar" aria-label="Mobile Navigation">
+        <button
+          onClick={() => setActiveDashboardView('ecom_flow')}
+          className={`wl-mob-nav-item ${activeDashboardView === 'ecom_flow' ? 'active' : ''}`}
+        >
+          <Sparkles style={{ width: 17, height: 17 }} />
+          <span>AI Flow</span>
+        </button>
+
+        <button
+          onClick={() => setActiveDashboardView('mobile_app')}
+          className={`wl-mob-nav-item ${activeDashboardView === 'mobile_app' ? 'active' : ''}`}
+        >
+          <Smartphone style={{ width: 17, height: 17 }} />
+          <span>3-Step</span>
+        </button>
+
+        <button
+          onClick={() => handleOpenJourneyModal('qr_scan')}
+          className="wl-mob-nav-item wl-mob-nav-center"
+        >
+          <div className="wl-mob-scan-center-btn">
+            <QrCode style={{ width: 20, height: 20 }} />
+          </div>
+          <span>Scan</span>
+        </button>
+
+        <button
+          onClick={() => handleOpenJourneyModal('try_list')}
+          className="wl-mob-nav-item"
+        >
+          <div className="wl-mob-nav-icon-wrap">
+            <Heart style={{ width: 17, height: 17 }} />
+            {tryList.length > 0 && <span className="wl-nav-badge">{tryList.length}</span>}
+          </div>
+          <span>Try List</span>
+        </button>
+
+        <button
+          onClick={() => handleOpenJourneyModal('cart')}
+          className="wl-mob-nav-item"
+        >
+          <div className="wl-mob-nav-icon-wrap">
+            <ShoppingBag style={{ width: 17, height: 17 }} />
+            {cartItems.length > 0 && <span className="wl-nav-badge">{cartItems.length}</span>}
+          </div>
+          <span>Cart</span>
+        </button>
+
+        <button
+          onClick={() => setIsProfileModalOpen(true)}
+          className="wl-mob-nav-item"
+        >
+          <Ruler style={{ width: 17, height: 17 }} />
+          <span>Profile</span>
+        </button>
+      </nav>
 
       {/* Footer */}
       <footer style={{

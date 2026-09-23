@@ -4175,5 +4175,463 @@ body {
   color: #000;
 }
 
+/* ============================================================
+   MOBILE RESPONSIVENESS & NATIVE SMARTPHONE EXPERIENCE
+   ============================================================ */
+
+/* Global Overflow Prevention on Mobile */
+html, body, #root, .wl-app {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Header Action Layouts */
+.wl-header-actions-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.wl-desktop-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
+.wl-mobile-actions {
+  display: none;
+}
+
+.wl-mobile-bottom-bar {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .wl-header {
+    padding: 10px 14px !important;
+  }
+  .wl-header-inner {
+    gap: 8px !important;
+  }
+  .wl-desktop-actions {
+    display: none !important;
+  }
+  .wl-mobile-actions {
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+  }
+  .wl-hide-on-mobile {
+    display: none !important;
+  }
+  .wl-logo-crest {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  .wl-logo-crest-inner svg {
+    width: 15px !important;
+    height: 15px !important;
+  }
+  .wl-title-text {
+    font-size: 16px !important;
+    letter-spacing: 0.5px !important;
+  }
+  .wl-lux-burger-trigger {
+    padding: 5px 8px !important;
+    gap: 6px !important;
+  }
+  .wl-burger-text-col, .wl-burger-chevron {
+    display: none !important;
+  }
+  .wl-burger-crest {
+    width: 28px !important;
+    height: 28px !important;
+  }
+}
+
+/* Mobile Quick Action Buttons */
+.wl-mob-quota-chip {
+  background: linear-gradient(135deg, rgba(223, 178, 107, 0.25) 0%, rgba(223, 178, 107, 0.1) 100%);
+  border: 1px solid var(--accent-gold);
+  color: var(--accent-gold-light);
+  border-radius: var(--radius-full);
+  padding: 5px 9px;
+  font-size: 11px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.wl-mob-icon-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+}
+
+.wl-mob-dot-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--accent-gold);
+  color: #000;
+  font-size: 9px;
+  font-weight: 900;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 8px var(--accent-gold-glow);
+}
+
+/* Dashboard Banner & Stats Row on Mobile */
+@media (max-width: 768px) {
+  .wl-dashboard-banner {
+    padding: 10px 12px !important;
+    margin-bottom: 14px !important;
+    border-radius: var(--radius-md) !important;
+    gap: 10px !important;
+  }
+  .wl-cmd-stats-row {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+  .wl-cmd-stat-item {
+    gap: 6px !important;
+    background: rgba(255, 255, 255, 0.03) !important;
+    padding: 6px 8px !important;
+    border-radius: var(--radius-xs) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  }
+  .wl-cmd-icon-box {
+    width: 26px !important;
+    height: 26px !important;
+  }
+  .wl-cmd-icon-box svg {
+    width: 12px !important;
+    height: 12px !important;
+  }
+  .wl-cmd-label {
+    font-size: 8px !important;
+    letter-spacing: 0.3px !important;
+  }
+  .wl-cmd-val {
+    font-size: 11px !important;
+    margin-top: 2px !important;
+    max-width: 110px !important;
+  }
+  .wl-cmd-actions-row {
+    width: 100% !important;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+  .wl-cmd-actions-row a,
+  .wl-cmd-actions-row button {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 8px 10px !important;
+    font-size: 11px !important;
+  }
+}
+
+/* View Switcher Tabs on Mobile */
+@media (max-width: 768px) {
+  .wl-view-switcher {
+    display: flex !important;
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    padding: 4px !important;
+    gap: 4px !important;
+    margin-bottom: 14px !important;
+  }
+  .wl-view-switcher::-webkit-scrollbar {
+    display: none !important;
+  }
+  .wl-view-tab {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+    padding: 8px 12px !important;
+    font-size: 11px !important;
+  }
+}
+
+/* Process Ribbon on Mobile */
+@media (max-width: 768px) {
+  .wl-process-ribbon {
+    padding: 10px 12px !important;
+    margin-bottom: 16px !important;
+  }
+  .wl-process-title-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 4px !important;
+    margin-bottom: 10px !important;
+  }
+  .wl-process-steps-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 4px !important;
+    width: 100% !important;
+  }
+  .wl-process-step-node {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 4px !important;
+  }
+  .wl-process-circle-icon {
+    width: 36px !important;
+    height: 36px !important;
+  }
+  .wl-process-circle-icon svg {
+    width: 16px !important;
+    height: 16px !important;
+  }
+  .wl-process-step-name {
+    font-size: 10px !important;
+  }
+  .wl-process-step-sub {
+    display: none !important;
+  }
+  .wl-process-arrow {
+    font-size: 11px !important;
+  }
+}
+
+/* E-Commerce Flow Cards on Mobile */
+@media (max-width: 768px) {
+  .wl-ecom-header {
+    margin-bottom: 14px !important;
+  }
+  .wl-ecom-title {
+    font-size: 16px !important;
+  }
+  .wl-ecom-subtitle {
+    font-size: 11px !important;
+    margin-bottom: 12px !important;
+  }
+  .wl-step-tracker {
+    display: flex !important;
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    justify-content: flex-start !important;
+    padding: 4px !important;
+    gap: 6px !important;
+  }
+  .wl-step-tracker::-webkit-scrollbar {
+    display: none !important;
+  }
+  .wl-step-chip {
+    flex-shrink: 0 !important;
+    padding: 5px 10px !important;
+    font-size: 11px !important;
+  }
+  .wl-circuit-line-bus {
+    display: none !important;
+  }
+  .wl-flow-cards-grid {
+    display: flex !important;
+    overflow-x: auto !important;
+    scroll-snap-type: x mandatory !important;
+    gap: 12px !important;
+    padding: 4px 4px 16px 4px !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+  }
+  .wl-flow-cards-grid::-webkit-scrollbar {
+    display: none !important;
+  }
+  .wl-flow-card {
+    flex: 0 0 88vw !important;
+    max-width: 360px !important;
+    scroll-snap-align: center !important;
+    min-height: 440px !important;
+    border-radius: 16px !important;
+    padding: 14px 12px !important;
+  }
+}
+
+/* Mobile App Simulator on Mobile */
+@media (max-width: 768px) {
+  .wl-mobile-experience-section {
+    padding: 12px 6px !important;
+  }
+  .wl-mobile-main-title {
+    font-size: 17px !important;
+  }
+  .wl-mobile-main-sub {
+    font-size: 11px !important;
+    margin-bottom: 12px !important;
+  }
+  .wl-mobile-step-switch {
+    overflow-x: auto !important;
+    flex-wrap: nowrap !important;
+    width: 100% !important;
+    scrollbar-width: none !important;
+    justify-content: flex-start !important;
+    padding: 4px !important;
+    gap: 6px !important;
+  }
+  .wl-mobile-step-switch::-webkit-scrollbar {
+    display: none !important;
+  }
+  .wl-mob-switch-pill {
+    flex-shrink: 0 !important;
+    padding: 6px 12px !important;
+    font-size: 11px !important;
+  }
+  /* On actual phone, show focused phone view */
+  .wl-phones-deck-container {
+    display: block !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+  .wl-phones-deck-container .wl-phone-wrapper {
+    display: none !important;
+  }
+  .wl-phones-deck-container .wl-phone-wrapper.focus-phone {
+    display: flex !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  .wl-iphone-mockup {
+    max-width: 100% !important;
+    width: 100% !important;
+    border-radius: 20px !important;
+    border-width: 4px !important;
+  }
+}
+
+/* Sticky Mobile Bottom Navigation Dock */
+@media (max-width: 768px) {
+  .wl-main-content {
+    padding: 12px 12px 90px 12px !important;
+  }
+  .wl-mobile-bottom-bar {
+    display: flex !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 9999 !important;
+    background: rgba(8, 11, 18, 0.95) !important;
+    backdrop-filter: blur(24px) !important;
+    -webkit-backdrop-filter: blur(24px) !important;
+    border-top: 1px solid var(--border-gold) !important;
+    padding: 6px 10px calc(env(safe-area-inset-bottom, 8px) + 6px) 10px !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.7) !important;
+  }
+  .wl-mob-nav-item {
+    background: transparent !important;
+    border: none !important;
+    color: var(--text-muted) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 3px !important;
+    cursor: pointer !important;
+    font-size: 9px !important;
+    font-weight: 700 !important;
+    font-family: var(--font-heading) !important;
+    padding: 4px 6px !important;
+    border-radius: var(--radius-xs) !important;
+    transition: var(--transition-smooth) !important;
+    min-width: 44px !important;
+  }
+  .wl-mob-nav-item.active {
+    color: var(--accent-gold-light) !important;
+  }
+  .wl-mob-nav-item.active svg {
+    color: var(--accent-gold) !important;
+    filter: drop-shadow(0 0 6px var(--accent-gold-glow)) !important;
+  }
+  .wl-mob-nav-center {
+    margin-top: -14px !important;
+  }
+  .wl-mob-scan-center-btn {
+    width: 42px !important;
+    height: 42px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, var(--accent-cyan) 0%, #0098a6 100%) !important;
+    color: #000 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 4px 16px rgba(0, 242, 254, 0.4) !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    transition: transform 0.2s ease !important;
+  }
+  .wl-mob-scan-center-btn:active {
+    transform: scale(0.92) !important;
+  }
+  .wl-mob-nav-icon-wrap {
+    position: relative !important;
+    display: inline-flex !important;
+  }
+  .wl-nav-badge {
+    position: absolute !important;
+    top: -5px !important;
+    right: -8px !important;
+    background: #f43f5e !important;
+    color: #fff !important;
+    font-size: 8px !important;
+    font-weight: 900 !important;
+    width: 14px !important;
+    height: 14px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 0 6px rgba(244, 63, 94, 0.6) !important;
+  }
+}
+
+/* Modals on Mobile */
+@media (max-width: 768px) {
+  .wl-journey-modal-content,
+  .wl-profile-modal-content {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 90vh !important;
+    border-radius: 20px 20px 0 0 !important;
+    position: fixed !important;
+    bottom: 0 !important;
+    margin: 0 !important;
+    padding: 16px !important;
+    box-sizing: border-box !important;
+  }
+  .wl-journey-modal-backdrop,
+  .wl-profile-modal-backdrop {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+  .wl-luxury-drawer {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    padding: 16px 14px !important;
+  }
+}
+
 
 
